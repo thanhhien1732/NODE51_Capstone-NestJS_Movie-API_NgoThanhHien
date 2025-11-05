@@ -5,7 +5,7 @@ import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 import { SkipPermission } from 'src/common/decorators/skip-permission.decorator';
-import { FindAllDto } from './dto/find-all.dto';
+import { FindAllPermissionDto } from './dto/find-all-permission.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Permission')
@@ -16,7 +16,6 @@ export class PermissionController {
 
   // ------------------ CREATE PERMISSION ------------------
   @Post()
-  @SkipPermission()  // xóa sau
   @ApiOperation({ summary: 'Create permission' })
   @MessageResponse('Permission created successfully!')
   create(@Query() dto: CreatePermissionDto) {
@@ -31,13 +30,12 @@ export class PermissionController {
     summary: 'Find all permissions (support pagination & keyword search, all optional)',
   })
   @MessageResponse('Permission list retrieved successfully!')
-  findAll(@Query() findAllDto: FindAllDto) {
-    return this.permissionService.findAll(findAllDto);
+  findAll(@Query() findAllPermissionDto: FindAllPermissionDto) {
+    return this.permissionService.findAll(findAllPermissionDto);
   }
 
   // ------------------ GET PERMISSION BY ID ------------------
   @Get(':id')
-  @SkipPermission()  // xóa sau
   @ApiOperation({ summary: 'Get permission by ID' })
   @MessageResponse('Permission retrieved successfully!')
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -46,7 +44,6 @@ export class PermissionController {
 
   // ------------------ UPDATE PERMISSION ------------------
   @Put(':id')
-  @SkipPermission()  // xóa sau
   @ApiOperation({ summary: 'Update permission' })
   @MessageResponse('Permission updated successfully!')
   update(@Param('id', ParseIntPipe) id: number, @Query() dto: UpdatePermissionDto) {
@@ -55,7 +52,6 @@ export class PermissionController {
 
   // ------------------ DELETE PERMISSION ------------------
   @Delete(':id')
-  @SkipPermission()  // xóa sau
   @ApiOperation({ summary: 'Delete permission' })
   @MessageResponse('Permission deleted successfully!')
   delete(@Param('id', ParseIntPipe) id: number) {
@@ -64,7 +60,6 @@ export class PermissionController {
 
   // ------------------ RESTORE PERMISSION ------------------
   @Post(':id')
-  @SkipPermission()  // xóa sau
   @ApiOperation({ summary: 'Restore deleted permission' })
   @MessageResponse('Permission restored successfully!')
   restore(@Param('id', ParseIntPipe) id: number) {

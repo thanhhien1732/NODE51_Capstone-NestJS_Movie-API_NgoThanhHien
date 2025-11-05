@@ -4,7 +4,7 @@ import { PrismaService } from 'src/modules/modules-system/prisma/prisma.service'
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Users } from 'generated/prisma';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { FindAllDto } from './dto/find-all.dto';
+import { FindAllUserDto } from './dto/find-all-user.dto';
 import cloudinary from 'src/common/cloudinary/init.cloudinary';
 
 @Injectable()
@@ -36,9 +36,32 @@ export class UserService {
       const emailExist = await this.prisma.users.findUnique({
         where: { email: dto.email },
       });
-
       if (emailExist)
         throw new BadRequestException('Email is already in use by another user.');
+    }
+
+    if (dto.phoneNumber && dto.phoneNumber !== user.phoneNumber) {
+      const phoneExist = await this.prisma.users.findFirst({
+        where: {
+          phoneNumber: dto.phoneNumber,
+          isDeleted: false,
+          NOT: { userId: user.userId },
+        },
+      });
+      if (phoneExist)
+        throw new BadRequestException('Phone number is already in use by another user.');
+    }
+
+    if (dto.fullName && dto.fullName !== user.fullName) {
+      const nameExist = await this.prisma.users.findFirst({
+        where: {
+          fullName: dto.fullName,
+          isDeleted: false,
+          NOT: { userId: user.userId },
+        },
+      });
+      if (nameExist)
+        throw new BadRequestException('Full name already exists. Please choose another.');
     }
 
     const updated = await this.prisma.users.update({
@@ -147,88 +170,53 @@ export class UserService {
     };
   }
 
-  // ------------------ Find All Users ------------------
-  async findAll(query: FindAllDto) {
-    const { page, pageSize, keyword } = query;
+  // ------------------ FIND ALL USERS ------------------
+  async findAll(query: FindAllUserDto) {
+    const { page, pageSize, keyword, email, phoneNumber } = query;
 
-    const searchCondition = keyword
-      ? {
-        OR: [
-          { fullName: { contains: keyword } },
-          { email: { contains: keyword } },
-          { phoneNumber: { contains: keyword } },
-        ],
-      }
-      : {};
-
-    const isPaginated = page && pageSize;
-
-    if (!isPaginated) {
-      const users = await this.prisma.users.findMany({
-        where: {
-          isDeleted: false,
-          ...searchCondition,
-        },
-        select: {
-          userId: true,
-          fullName: true,
-          email: true,
-          phoneNumber: true,
-          avatar: true,
-          roleId: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      });
-
-      return {
-        totalItem: users.length,
-        items: users,
-      };
+    const where = {
+      isDeleted: false,
+      ...(keyword ? { fullName: { contains: keyword } } : {}),
+      ...(email ? { email: { contains: email } } : {}),
+      ...(phoneNumber ? { phoneNumber: { contains: phoneNumber } } : {}),
     }
 
-    const pageNum = Number(page) > 0 ? Number(page) : 1;
-    const pageSizeNum = Number(pageSize) > 0 ? Number(pageSize) : 10;
-    const skip = (pageNum - 1) * pageSizeNum;
+    const hasPagination = page && pageSize;
+    const skip = hasPagination ? (Number(page) - 1) * Number(pageSize) : undefined;
+    const take = hasPagination ? Number(pageSize) : undefined;
 
-    const [users, totalItem] = await Promise.all([
+    const [items, totalItem] = await Promise.all([
       this.prisma.users.findMany({
+        where,
         skip,
-        take: pageSizeNum,
-        where: {
-          isDeleted: false,
-          ...searchCondition,
-        },
-        select: {
-          userId: true,
-          fullName: true,
-          email: true,
-          phoneNumber: true,
-          avatar: true,
-          roleId: true,
-          createdAt: true,
-          updatedAt: true,
+        take,
+        include: {
+          Roles: { select: { roleName: true } },
         },
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.users.count({
-        where: {
-          isDeleted: false,
-          ...searchCondition,
-        },
-      }),
+      this.prisma.users.count({ where }),
     ]);
 
-    const totalPage = Math.ceil(totalItem / pageSizeNum);
-
     return {
-      page: pageNum,
-      pageSize: pageSizeNum,
-      keyword,
+      page: Number(page) || 1,
+      pageSize: Number(pageSize) || totalItem,
       totalItem,
-      totalPage,
-      items: users || [],
+      totalPage: hasPagination ? Math.ceil(totalItem / Number(pageSize)) : 1,
+      keyword: keyword || null,
+      email: email || null,
+      phoneNumber: phoneNumber || null,
+      items: items.map(i => ({
+        userId: i.userId,
+        roleName: i.Roles?.roleName ?? null,
+        fullName: i.fullName,
+        email: i.email,
+        phoneNumber: i.phoneNumber,
+        avatar: i.avatar,
+        googleId: i.googleId,
+        createdAt: i.createdAt,
+        updatedAt: i.updatedAt,
+      })),
     };
   }
 
@@ -248,6 +236,7 @@ export class UserService {
       },
     });
     if (!user) throw new BadRequestException('User not found.');
+
     return user;
   }
 }

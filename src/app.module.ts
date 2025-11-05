@@ -9,9 +9,12 @@ import { AuthModule } from './modules/modules-api/auth/auth.module';
 import { UserModule } from './modules/modules-api/user/user.module';
 import { RoleModule } from './modules/modules-api/role/role.module';
 import { PermissionModule } from './modules/modules-api/permission/permission.module';
+import { CinemaModule } from './modules/modules-api/cinema/cinema.module';
+import { CinemaBrandModule } from './modules/modules-api/cinema-brand/cinema-brand.module';
+import { CinemaAreaModule } from './modules/modules-api/cinema-area/cinema-area.module';
 
 @Module({
-  imports: [PrismaModule, TokenModule, AuthModule, UserModule, RoleModule, PermissionModule],
+  imports: [PrismaModule, TokenModule, AuthModule, UserModule, RoleModule, PermissionModule, CinemaModule, CinemaBrandModule, CinemaAreaModule],
   controllers: [AppController],
   providers: [AppService, ProtectStrategy, PermissionStrategy],
 })

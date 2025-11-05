@@ -2,8 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from 'src/modules/modules-system/prisma/prisma.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { AssignPermissionDto } from './dto/assign-permission.dto';
-import { FindAllDto } from './dto/find-all.dto';
+import { FindAllRoleDto } from './dto/find-all-role.dto';
 
 @Injectable()
 export class RoleService {
@@ -12,7 +11,7 @@ export class RoleService {
   // ------------------ CREATE ROLE ------------------
   async create(createRoleDto: CreateRoleDto) {
     const exist = await this.prisma.roles.findFirst({
-      where: { name: createRoleDto.name },
+      where: { roleName: createRoleDto.roleName },
     });
 
     if (exist) throw new BadRequestException('Role already exists!');
@@ -26,13 +25,13 @@ export class RoleService {
   }
 
   // ------------------ FIND ALL ROLE  ------------------
-  async findAll(query: FindAllDto) {
+  async findAll(query: FindAllRoleDto) {
     const { page, pageSize, keyword } = query;
 
     const searchCondition = keyword
       ? {
         OR: [
-          { name: { contains: keyword } },
+          { roleName: { contains: keyword } },
           { description: { contains: keyword } },
         ],
       }
@@ -130,11 +129,29 @@ export class RoleService {
   }
 
   // ------------------ UPDATE ROLE ------------------
-  async update(id: number, updateRoleDto: UpdateRoleDto) {
-    return this.prisma.roles.update({
+  async update(id: number, dto: UpdateRoleDto) {
+    const found = await this.prisma.roles.findUnique({ where: { roleId: id } });
+    if (!found || found.isDeleted) {
+      throw new NotFoundException('Role not found!');
+    }
+
+    if (dto.roleName) {
+      const dup = await this.prisma.roles.findFirst({
+        where: {
+          roleName: dto.roleName,
+          isDeleted: false,
+          NOT: { roleId: id },
+        },
+      });
+      if (dup) throw new BadRequestException('Role name already exists!');
+    }
+
+    await this.prisma.roles.update({
       where: { roleId: id },
-      data: updateRoleDto,
+      data: dto,
     });
+
+    return;
   }
 
   // ------------------ DELETE ROLE ------------------

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsNumber, Min, IsString } from 'class-validator';
 
-export class FindAllDto {
+export class FindAllRoleDto {
     @IsNumber()
     @Min(1)
     @IsOptional()
@@ -25,9 +25,9 @@ export class FindAllDto {
     @IsString()
     @IsOptional()
     @ApiProperty({
-        example: 'Nguyễn',
+        example: 'User',
         required: false,
-        description: 'Search keywords (applies to fullName, email, phoneNumber)',
+        description: 'Search keywords (applies to name, description)',
     })
     keyword?: string;
 }

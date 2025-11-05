@@ -5,7 +5,7 @@ export class CreateRoleDto {
     @ApiProperty({ example: 'STAFF' })
     @IsNotEmpty()
     @IsString()
-    name: string;
+    roleName: string;
 
     @ApiProperty({ example: 'Nhân Viên' })
     @IsOptional()

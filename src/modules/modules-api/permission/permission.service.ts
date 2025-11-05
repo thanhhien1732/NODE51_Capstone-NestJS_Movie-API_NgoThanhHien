@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from 'src/modules/modules-system/prisma/prisma.service';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
-import { FindAllDto } from './dto/find-all.dto';
+import { FindAllPermissionDto } from './dto/find-all-permission.dto';
 
 @Injectable()
 export class PermissionService {
@@ -25,7 +25,7 @@ export class PermissionService {
   }
 
   // ------------------ FIND ALL PERMISSION  ------------------
-  async findAll(query: FindAllDto) {
+  async findAll(query: FindAllPermissionDto) {
     const { page, pageSize, keyword } = query;
 
     const searchCondition = keyword
@@ -103,10 +103,42 @@ export class PermissionService {
 
   // ------------------ UPDATE PERMISSION ------------------
   async update(id: number, dto: UpdatePermissionDto) {
-    return this.prisma.permissions.update({
+    const found = await this.prisma.permissions.findUnique({ where: { permissionId: id } });
+    if (!found || found.isDeleted) {
+      throw new NotFoundException('Permission not found!');
+    }
+
+    if (dto.name) {
+      const dupName = await this.prisma.permissions.findFirst({
+        where: {
+          name: dto.name,
+          isDeleted: false,
+          NOT: { permissionId: id },
+        },
+      });
+      if (dupName) throw new BadRequestException('Permission name already exists!');
+    }
+
+    const nextEndpoint = dto.endpoint ?? found.endpoint;
+    const nextMethod = dto.method ?? found.method;
+
+    const dupRoute = await this.prisma.permissions.findFirst({
+      where: {
+        endpoint: nextEndpoint,
+        method: nextMethod,
+        isDeleted: false,
+        NOT: { permissionId: id },
+      },
+    });
+
+    if (dupRoute) throw new BadRequestException('This endpoint + method already exists!');
+
+    await this.prisma.permissions.update({
       where: { permissionId: id },
       data: dto,
     });
+
+    return;
   }
 
   // ------------------ DELETE PERMISSION ------------------

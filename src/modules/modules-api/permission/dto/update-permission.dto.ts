@@ -1,25 +1,25 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { CreatePermissionDto } from './create-permission.dto';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdatePermissionDto extends PartialType(CreatePermissionDto) {
-    @ApiProperty({ example: 'Get all users' })
-    @IsNotEmpty()
+    @ApiPropertyOptional({ example: 'Get all users' })
+    @IsOptional()
     @IsString()
-    name: string;
+    name?: string;
 
-    @ApiProperty({ example: '/api/user/...' })
-    @IsNotEmpty()
+    @ApiPropertyOptional({ example: '/api/user/...' })
+    @IsOptional()
     @IsString()
-    endpoint: string;
+    endpoint?: string;
 
-    @ApiProperty({ example: 'GET' })
-    @IsNotEmpty()
+    @ApiPropertyOptional({ example: 'GET' })
+    @IsOptional()
     @IsString()
-    method: string;
+    method?: string;
 
-    @ApiProperty({ example: 'User' })
-    @IsNotEmpty()
+    @ApiPropertyOptional({ example: 'User' })
+    @IsOptional()
     @IsString()
-    module: string;
+    module?: string;
 }

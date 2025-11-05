@@ -22,7 +22,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalInterceptors(new ResponseSuccessInterceptor(reflector));
   app.useGlobalGuards(new ProtectGuard(reflector));
-  app.useGlobalGuards(new PermissionGuard(reflector));
+  // app.useGlobalGuards(new PermissionGuard(reflector));
 
   // SWAGGER 
   const config = new DocumentBuilder()

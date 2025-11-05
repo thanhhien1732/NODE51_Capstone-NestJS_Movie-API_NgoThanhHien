@@ -1,37 +1,25 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  ParseIntPipe,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 import { SkipPermission } from 'src/common/decorators/skip-permission.decorator';
-import { FindAllDto } from './dto/find-all.dto';
+import { FindAllRoleDto } from './dto/find-all-role.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Role')
-@ApiBearerAuth()
 @Controller('role')
+@ApiBearerAuth()
 export class RoleController {
   constructor(private readonly roleService: RoleService) { }
 
   @Post()
-  @SkipPermission() // xóa sau
   @ApiOperation({ summary: 'Create new role' })
   @MessageResponse('Role created successfully!')
   create(@Query() dto: CreateRoleDto) {
     return this.roleService.create(dto);
   }
-
 
   @Get()
   @Public()
@@ -40,13 +28,11 @@ export class RoleController {
     summary: 'Find all roles (support pagination & keyword search, all optional)',
   })
   @MessageResponse('Role list retrieved successfully!')
-  findAll(@Query() findAllDto: FindAllDto) {
-    return this.roleService.findAll(findAllDto);
+  findAll(@Query() findAllRoleDto: FindAllRoleDto) {
+    return this.roleService.findAll(findAllRoleDto);
   }
 
-
   @Post('assign-permissions')
-  @SkipPermission() // xóa sau
   @ApiOperation({ summary: 'Assign permissions to a role' })
   @MessageResponse('Permissions assigned successfully!')
   async assignPermissions(
@@ -58,7 +44,6 @@ export class RoleController {
   }
 
   @Get(':id')
-  @SkipPermission() // xóa sau
   @ApiOperation({ summary: 'Get role by ID' })
   @MessageResponse('Role retrieved successfully!')
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -66,7 +51,6 @@ export class RoleController {
   }
 
   @Put(':id')
-  @SkipPermission() // xóa sau
   @ApiOperation({ summary: 'Update role' })
   @MessageResponse('Role updated successfully!')
   update(@Param('id', ParseIntPipe) id: number, @Query() dto: UpdateRoleDto) {
@@ -74,7 +58,6 @@ export class RoleController {
   }
 
   @Delete(':id')
-  @SkipPermission() // xóa sau
   @ApiOperation({ summary: 'Soft delete role' })
   @MessageResponse('Role deleted successfully!')
   delete(@Param('id', ParseIntPipe) id: number) {
@@ -82,7 +65,6 @@ export class RoleController {
   }
 
   @Post(':id')
-  @SkipPermission() // xóa sau
   @ApiOperation({ summary: 'Restore role' })
   @MessageResponse('Role restored successfully!')
   async restoreRole(@Param('id') roleId: string) {

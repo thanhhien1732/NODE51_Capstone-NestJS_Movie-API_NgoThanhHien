@@ -1,17 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
-  Body,
-  UploadedFile,
-  UseInterceptors,
-  ParseIntPipe,
-  Query,
-  BadRequestException,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, UploadedFile, UseInterceptors, ParseIntPipe, Query, BadRequestException } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -23,8 +10,8 @@ import type { Users } from 'generated/prisma';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import { RestoreUserDto } from './dto/restore-user.dto';
-import { FindAllDto } from './dto/find-all.dto';
 import { UploadAvatarDto } from './dto/avatar-user.dto';
+import { FindAllUserDto } from './dto/find-all-user.dto';
 
 @ApiTags('User')
 @Controller('user')
@@ -69,7 +56,6 @@ export class UsersController {
 
   // ------------------ Upload Avatar ------------------
   @Post('avatar')
-  @SkipPermission() // xoa sau
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Upload user avatar (1 image only)' })
   @ApiConsumes('multipart/form-data')
@@ -93,7 +79,6 @@ export class UsersController {
 
   // ------------------ Delete Avatar ------------------
   @Delete('avatar')
-  @SkipPermission() // xoa sau
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete user avatar (Cloudinary + DB)' })
   @MessageResponse('Avatar deleted successfully!')
@@ -109,14 +94,13 @@ export class UsersController {
     summary: 'Find all users (support pagination & keyword search, all optional)',
   })
   @MessageResponse('User list retrieved successfully!')
-  findAll(@Query() findAllDto: FindAllDto) {
-    return this.userService.findAll(findAllDto);
+  findAll(@Query() findAllUserDto: FindAllUserDto) {
+    return this.userService.findAll(findAllUserDto);
   }
 
   // ------------------ Find User By Id ------------------
   @Get(':userId')
   @Public()
-  @SkipPermission() // xóa sau
   @ApiOperation({ summary: 'Find user detail by id' })
   @MessageResponse('User detail retrieved successfully!')
   findById(@Param('userId', ParseIntPipe) userId: number) {
