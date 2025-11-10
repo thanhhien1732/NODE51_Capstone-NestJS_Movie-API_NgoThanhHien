@@ -140,7 +140,7 @@ http://localhost:3069/api/docs
 
 ---
 
-## 🧱 API Modules (Total: 109 APIs)
+## 🧱 API Modules (Total: 110 APIs)
 
 ### 🔐 Auth (4 APIs)
 | Method | Endpoint | Description |
