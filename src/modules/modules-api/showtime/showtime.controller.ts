@@ -6,9 +6,9 @@ import { UpdateShowtimeDto } from './dto/update-showtime.dto';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 import { FindAllShowtimeDto } from './dto/find-all-showtime.dto';
 
-@ApiTags('Showtimes')
+@ApiTags('Showtime')
+@Controller('showtime')
 @ApiBearerAuth()
-@Controller('showtimes')
 export class ShowtimeController {
   constructor(private readonly service: ShowtimeService) { }
 

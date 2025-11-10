@@ -26,10 +26,9 @@ import { BookingModule } from './modules/modules-api/booking/booking.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PaymentModule } from './modules/modules-api/booking-payment/booking-payment.module';
 import { BookingExpirationJob } from './common/jobs/booking-expiration.job';
-import { TesttttttModule } from './modules/modules-api/testttttt/testttttt.module';
 
 @Module({
-  imports: [PrismaModule, TokenModule, AuthModule, UserModule, RoleModule, PermissionModule, CinemaModule, CinemaBrandModule, CinemaAreaModule, RoomsModule, ScreenTechModule, SoundSystemModule, SeatModule, SeatTypeModule, MovieModule, MoveFormatModule, MovieGenreModule, AgeLimitModule, ShowtimeModule, BookingModule, ScheduleModule.forRoot(), PaymentModule, TesttttttModule],
+  imports: [PrismaModule, TokenModule, AuthModule, UserModule, RoleModule, PermissionModule, CinemaModule, CinemaBrandModule, CinemaAreaModule, RoomsModule, ScreenTechModule, SoundSystemModule, SeatModule, SeatTypeModule, MovieModule, MoveFormatModule, MovieGenreModule, AgeLimitModule, ShowtimeModule, BookingModule, ScheduleModule.forRoot(), PaymentModule],
   controllers: [AppController],
   providers: [AppService, ProtectStrategy, PermissionStrategy, BookingExpirationJob],
 })
