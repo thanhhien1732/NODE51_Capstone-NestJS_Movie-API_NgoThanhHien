@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateCinemaBrandDto {
     @ApiProperty({
@@ -17,4 +17,10 @@ export class CreateCinemaBrandDto {
     })
     @IsOptional()
     file?: any;
+
+    @ApiProperty({ example: 1.5, description: 'Hệ số giá vé của thương hiệu' })
+    @IsNotEmpty()
+    @IsNumber()
+    @Min(1.0)
+    multiplier: number;
 }

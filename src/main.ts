@@ -22,11 +22,11 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalInterceptors(new ResponseSuccessInterceptor(reflector));
   app.useGlobalGuards(new ProtectGuard(reflector));
-  // app.useGlobalGuards(new PermissionGuard(reflector));
+  app.useGlobalGuards(new PermissionGuard(reflector));
 
   // SWAGGER 
   const config = new DocumentBuilder()
-    .setTitle('Capstone Nestjs (Movie API)')
+    .setTitle('Capstone NestJS (Movie API)')
     .setDescription('Developed by Ngo Thanh Hien')
     .setVersion('1.0')
     .addBearerAuth()

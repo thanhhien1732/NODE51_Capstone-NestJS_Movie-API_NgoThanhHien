@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/modules/modules-system/prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -16,18 +16,16 @@ export class UserService {
   // ------------------ Change Password ------------------
   async changePassword(user: Users, dto: ChangePasswordDto) {
     const { oldPassword, newPassword } = dto;
-
     const match = await bcrypt.compare(oldPassword, user.password);
+
     if (!match) throw new BadRequestException('Old password is incorrect.');
 
     const newHash = await bcrypt.hash(newPassword, 10);
 
-    await this.prisma.users.update({
+    return this.prisma.users.update({
       where: { userId: user.userId },
       data: { password: newHash },
     });
-
-    return;
   }
 
   // ------------------ Update User ------------------
@@ -84,26 +82,28 @@ export class UserService {
   }
 
   // ------------------ Delete User ------------------
-  async delete(user: Users) {
-    await this.prisma.users.update({
+  delete(user: Users) {
+
+    return this.prisma.users.update({
       where: { userId: user.userId },
       data: { isDeleted: true, deletedAt: new Date() },
     });
-    return;
   }
 
   // ------------------ Restore User ------------------
   async restore(email: string) {
-    const user = await this.prisma.users.findUnique({ where: { email } });
-    if (!user || !user.isDeleted)
-      throw new BadRequestException('No user found to restore.');
+    const user = await this.prisma.users.findUnique({
+      where: { email }
+    });
 
-    await this.prisma.users.update({
+    if (!user) throw new NotFoundException('User not found');
+
+    if (!user.isDeleted) throw new BadRequestException('User is not deleted');
+
+    return this.prisma.users.update({
       where: { email },
       data: { isDeleted: false, deletedAt: null },
     });
-
-    return;
   }
 
   // ------------------ Upload Avatar ------------------
@@ -115,7 +115,7 @@ export class UserService {
 
     const uploadResult = await new Promise<any>((resolve, reject) => {
       cloudinary.uploader
-        .upload_stream({ folder: 'avatars' }, (error, result) => {
+        .upload_stream({ folder: 'movie/avatars' }, (error, result) => {
           if (error) return reject(error);
           resolve(result);
         })
@@ -193,7 +193,7 @@ export class UserService {
         include: {
           Roles: { select: { roleName: true } },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { userId: 'desc' },
       }),
       this.prisma.users.count({ where }),
     ]);
@@ -222,7 +222,7 @@ export class UserService {
 
   // ------------------ Find User By Id ------------------
   async findById(userId: number) {
-    const user = await this.prisma.users.findUnique({
+    const userExist = await this.prisma.users.findUnique({
       where: { userId },
       select: {
         userId: true,
@@ -235,8 +235,8 @@ export class UserService {
         updatedAt: true,
       },
     });
-    if (!user) throw new BadRequestException('User not found.');
+    if (!userExist) throw new BadRequestException('User not found.');
 
-    return user;
+    return userExist;
   }
 }

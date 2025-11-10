@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, Max } from "class-validator";
 
 export class RegisterDto {
     @IsString()
@@ -14,7 +14,8 @@ export class RegisterDto {
     email: string;
 
     @IsOptional()
-    @ApiProperty({ example: '0909123456', required: false })
+    @Max(10)
+    @ApiPropertyOptional({ example: '0909123456' })
     phoneNumber?: string;
 
     @IsString()

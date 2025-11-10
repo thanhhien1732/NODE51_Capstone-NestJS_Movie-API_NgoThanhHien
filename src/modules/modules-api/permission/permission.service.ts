@@ -10,14 +10,14 @@ export class PermissionService {
 
   // ------------------ CREATE PERMISSION ------------------
   async create(dto: CreatePermissionDto) {
-    const exist = await this.prisma.permissions.findFirst({
+    const permissionExist = await this.prisma.permissions.findFirst({
       where: {
         endpoint: dto.endpoint,
         method: dto.method,
       },
     });
 
-    if (exist) throw new BadRequestException('Permission already exists!');
+    if (permissionExist) throw new BadRequestException('Permission already exists!');
 
     return this.prisma.permissions.create({
       data: dto,
@@ -47,7 +47,7 @@ export class PermissionService {
           isDeleted: false,
           ...searchCondition,
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { permissionId: 'desc' },
       });
 
       return {
@@ -68,7 +68,7 @@ export class PermissionService {
           isDeleted: false,
           ...searchCondition,
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { permissionId: 'desc' },
       }),
 
       this.prisma.permissions.count({
@@ -93,18 +93,20 @@ export class PermissionService {
 
   // ------------------ GET PERMISSION BY ID ------------------
   async findOne(id: number) {
-    const permission = await this.prisma.permissions.findUnique({
+    const permissionExist = await this.prisma.permissions.findUnique({
       where: { permissionId: id },
     });
 
-    if (!permission) throw new BadRequestException('Permission not found');
-    return permission;
+    if (!permissionExist) throw new BadRequestException('Permission not found');
+
+    return permissionExist;
   }
 
   // ------------------ UPDATE PERMISSION ------------------
   async update(id: number, dto: UpdatePermissionDto) {
-    const found = await this.prisma.permissions.findUnique({ where: { permissionId: id } });
-    if (!found || found.isDeleted) {
+    const permissionExist = await this.prisma.permissions.findUnique({ where: { permissionId: id } });
+
+    if (!permissionExist || permissionExist.isDeleted) {
       throw new NotFoundException('Permission not found!');
     }
 
@@ -119,8 +121,8 @@ export class PermissionService {
       if (dupName) throw new BadRequestException('Permission name already exists!');
     }
 
-    const nextEndpoint = dto.endpoint ?? found.endpoint;
-    const nextMethod = dto.method ?? found.method;
+    const nextEndpoint = dto.endpoint ?? permissionExist.endpoint;
+    const nextMethod = dto.method ?? permissionExist.method;
 
     const dupRoute = await this.prisma.permissions.findFirst({
       where: {
@@ -133,51 +135,43 @@ export class PermissionService {
 
     if (dupRoute) throw new BadRequestException('This endpoint + method already exists!');
 
-    await this.prisma.permissions.update({
+    return this.prisma.permissions.update({
       where: { permissionId: id },
       data: dto,
     });
-
-    return;
   }
 
   // ------------------ DELETE PERMISSION ------------------
   async delete(id: number) {
-    const permission = await this.prisma.permissions.findUnique({ where: { permissionId: id } });
+    const permissionExist = await this.prisma.permissions.findUnique({ where: { permissionId: id } });
 
-    if (!permission) {
-      throw new NotFoundException('permission not found.');
+    if (!permissionExist) {
+      throw new NotFoundException('Permission not found.');
     }
 
-    if (permission.isDeleted || permission.deletedAt !== null) {
-      throw new BadRequestException('This permission has already been deleted.');
+    if (permissionExist.isDeleted) {
+      throw new BadRequestException('Permission has already been deleted.');
     }
 
-    const deletedpermission = await this.prisma.permissions.update({
+    return this.prisma.permissions.update({
       where: { permissionId: id },
       data: {
         isDeleted: true,
         deletedAt: new Date(),
       },
     });
-
-    return
   }
 
   // ------------------ RESTORE PERMISSION ------------------
   async restore(id: number) {
-    const permission = await this.prisma.permissions.findUnique({
+    const permissionExist = await this.prisma.permissions.findUnique({
       where: { permissionId: id },
     });
 
-    if (!permission) throw new BadRequestException('Permission not found');
+    if (!permissionExist) throw new BadRequestException('Permission not found');
 
-    if (!permission.isDeleted) {
-      throw new BadRequestException('Permission is already active');
-    }
-
-    if (permission.deletedAt === null) {
-      throw new BadRequestException('This permission is already active.');
+    if (!permissionExist.isDeleted) {
+      throw new BadRequestException('Permission is not deleted');
     }
 
     return this.prisma.permissions.update({

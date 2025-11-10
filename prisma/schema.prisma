@@ -11,6 +11,7 @@ datasource db {
 model Cinemas {
   cinemaId     Int           @id @default(autoincrement())
   cinemaName   String        @db.VarChar(100)
+  address      String?       @db.VarChar(255)
   totalRoom    Int?          @default(5)
   brandId      Int?
   areaId       Int?
@@ -20,8 +21,7 @@ model Cinemas {
   deletedAt    DateTime?     @db.Timestamp(0)
   CinemaAreas  CinemaAreas?  @relation(fields: [areaId], references: [areaId], onDelete: Cascade)
   CinemaBrands CinemaBrands? @relation(fields: [brandId], references: [brandId], onDelete: Cascade)
-  Movies       Movies[]
-  Rooms        Rooms[]
+  Showtimes    Showtimes[]
 
   @@index([areaId], map: "Cinemas_areaId_fkey")
   @@index([brandId], map: "Cinemas_brandId_fkey")
@@ -29,36 +29,30 @@ model Cinemas {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Movies {
-  movieId       Int           @id @default(autoincrement())
-  movieName     String        @db.VarChar(255)
-  trailer       String?       @db.VarChar(255)
-  poster        String?       @db.VarChar(255)
-  description   String?       @db.Text
-  startDate     DateTime?     @db.Date
-  endDate       DateTime?     @db.Date
-  rating        Int?          @default(0)
-  isHot         Boolean?      @default(false)
-  isShowing     Boolean?      @default(false)
-  isComing      Boolean?      @default(false)
-  movieFormatId Int?
-  movieGenreId  Int?
-  cinemaId      Int?
-  ageLimitId    Int?
-  createdAt     DateTime      @default(now()) @db.Timestamp(0)
-  updatedAt     DateTime      @default(now()) @updatedAt @db.Timestamp(0)
-  isDeleted     Boolean?      @default(false)
-  deletedAt     DateTime?     @db.Timestamp(0)
-  AgeLimits     AgeLimits?    @relation(fields: [ageLimitId], references: [ageLimitId])
-  MovieFormats  MovieFormats? @relation(fields: [movieFormatId], references: [movieFormatId])
-  MovieGenres   MovieGenres?  @relation(fields: [movieGenreId], references: [movieGenreId])
-  Cinemas       Cinemas?      @relation(fields: [cinemaId], references: [cinemaId], onDelete: Cascade, onUpdate: NoAction, map: "fk_movies_cinema")
-  Showtimes     Showtimes[]
+  movieId      Int          @id @default(autoincrement())
+  movieName    String       @db.VarChar(255)
+  description  String?      @db.Text
+  poster       String?      @db.VarChar(255)
+  trailer      String?      @db.VarChar(255)
+  startDate    DateTime?    @db.Date
+  endDate      DateTime?    @db.Date
+  basePrice    Int?
+  rating       Int?
+  isComing     Boolean?     @default(false)
+  isShowing    Boolean?     @default(false)
+  isHot        Boolean?     @default(false)
+  movieGenreId Int?
+  ageLimitId   Int?
+  createdAt    DateTime     @default(now()) @db.Timestamp(0)
+  updatedAt    DateTime     @default(now()) @updatedAt @db.Timestamp(0)
+  isDeleted    Boolean?     @default(false)
+  deletedAt    DateTime?    @db.Timestamp(0)
+  AgeLimits    AgeLimits?   @relation(fields: [ageLimitId], references: [ageLimitId])
+  MovieGenres  MovieGenres? @relation(fields: [movieGenreId], references: [movieGenreId])
+  Showtimes    Showtimes[]
 
-  @@index([cinemaId], map: "fk_movies_cinema")
-  @@index([movieFormatId], map: "fk_movies_format")
   @@index([movieGenreId], map: "fk_movies_genre")
   @@index([ageLimitId], map: "fk_movies_agelimit")
-  @@index([movieName])
 }
 
 model Seats {
@@ -67,75 +61,59 @@ model Seats {
   rowLabel    String?    @db.VarChar(5)
   columnIndex Int?
   seatTypeId  Int?
-  roomId      Int?
   createdAt   DateTime   @default(now()) @db.Timestamp(0)
   updatedAt   DateTime   @default(now()) @updatedAt @db.Timestamp(0)
   isDeleted   Boolean?   @default(false)
   deletedAt   DateTime?  @db.Timestamp(0)
-  Rooms       Rooms?     @relation(fields: [roomId], references: [roomId], onDelete: Cascade)
+  Bookings    Bookings[]
   SeatTypes   SeatTypes? @relation(fields: [seatTypeId], references: [seatTypeId], onDelete: Cascade)
-  Tickets     Tickets[]
 
   @@index([seatTypeId], map: "fk_seats_type")
-  @@index([roomId], map: "fk_seats_room")
 }
 
 model Showtimes {
-  showtimeId      Int       @id @default(autoincrement())
+  showtimeId      Int           @id @default(autoincrement())
   movieId         Int?
+  formatId        Int?
+  cinemaId        Int?
   roomId          Int?
-  ticketPrice     Int
-  durationMinutes Int?      @default(120)
-  showDate        DateTime  @default(dbgenerated("(curdate())")) @db.Date
-  showTimeStart   String    @default("00:00") @db.VarChar(10)
-  showTimeEnd     String    @default("00:00") @db.VarChar(10)
-  createdAt       DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt       DateTime  @default(now()) @updatedAt @db.Timestamp(0)
-  isDeleted       Boolean?  @default(false)
-  deletedAt       DateTime? @db.Timestamp(0)
-  Movies          Movies?   @relation(fields: [movieId], references: [movieId], onDelete: Cascade, map: "Showtimes_ibfk_1")
-  Rooms           Rooms?    @relation(fields: [roomId], references: [roomId], onDelete: Cascade, map: "Showtimes_ibfk_2")
-  Tickets         Tickets[]
+  basePrice       Int           @default(0)
+  showDate        DateTime?     @db.Date
+  showTimeStart   String        @default("00:00") @db.VarChar(10)
+  showTimeEnd     String        @default("00:00") @db.VarChar(10)
+  durationMinutes Int?          @default(0)
+  createdAt       DateTime      @default(now()) @db.Timestamp(0)
+  updatedAt       DateTime      @default(now()) @updatedAt @db.Timestamp(0)
+  isDeleted       Boolean?      @default(false)
+  deletedAt       DateTime?     @db.Timestamp(0)
+  Bookings        Bookings[]
+  Cinemas         Cinemas?      @relation(fields: [cinemaId], references: [cinemaId], onDelete: Cascade)
+  MovieFormats    MovieFormats? @relation(fields: [formatId], references: [formatId])
+  Movies          Movies?       @relation(fields: [movieId], references: [movieId], onDelete: Cascade, map: "Showtimes_ibfk_1")
+  Rooms           Rooms?        @relation(fields: [roomId], references: [roomId], onDelete: Cascade, map: "Showtimes_ibfk_2")
 
   @@index([movieId], map: "movieId")
   @@index([roomId], map: "roomId")
-}
-
-model Tickets {
-  ticketId        Int       @id @default(autoincrement())
-  userId          Int
-  showtimeId      Int
-  seatId          Int
-  totalPrice      Int?      @default(0)
-  bookingDateTime DateTime? @default(now()) @db.DateTime(0)
-  createdAt       DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt       DateTime  @default(now()) @updatedAt @db.Timestamp(0)
-  isDeleted       Boolean?  @default(false)
-  deletedAt       DateTime? @db.Timestamp(0)
-  Seats           Seats     @relation(fields: [seatId], references: [seatId], onDelete: Cascade)
-  Showtimes       Showtimes @relation(fields: [showtimeId], references: [showtimeId], onDelete: Cascade)
-  Users           Users     @relation(fields: [userId], references: [userId], onDelete: Cascade)
-
-  @@index([showtimeId])
-  @@index([seatId])
-  @@index([userId], map: "Tickets_userId_fkey")
+  @@index([basePrice], map: "idx_Showtimes_basePrice")
+  @@index([cinemaId], map: "idx_Showtimes_cinemaId")
+  @@index([formatId], map: "Showtimes_formatId_fkey")
 }
 
 model Users {
-  userId      Int       @id @default(autoincrement())
-  fullName    String    @db.VarChar(100)
-  email       String    @unique(map: "email") @db.VarChar(100)
-  phoneNumber String?   @db.VarChar(20)
-  password    String    @db.VarChar(255)
-  avatar      String?   @db.VarChar(255)
-  googleId    String?   @unique(map: "googleId") @db.VarChar(255)
-  roleId      Int?      @default(2)
-  createdAt   DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(0)
-  isDeleted   Boolean?  @default(false)
-  deletedAt   DateTime? @db.Timestamp(0)
-  Tickets     Tickets[]
-  Roles       Roles?    @relation(fields: [roleId], references: [roleId], map: "Users_ibfk_1")
+  userId      Int        @id @default(autoincrement())
+  fullName    String     @db.VarChar(100)
+  email       String     @unique(map: "email") @db.VarChar(100)
+  phoneNumber String?    @db.VarChar(20)
+  password    String     @db.VarChar(255)
+  avatar      String?    @db.VarChar(255)
+  googleId    String?    @unique(map: "googleId") @db.VarChar(255)
+  roleId      Int?       @default(2)
+  createdAt   DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime   @default(now()) @updatedAt @db.Timestamp(0)
+  isDeleted   Boolean?   @default(false)
+  deletedAt   DateTime?  @db.Timestamp(0)
+  Bookings    Bookings[]
+  Roles       Roles?     @relation(fields: [roleId], references: [roleId], map: "Users_ibfk_1")
 
   @@index([email], map: "idxUserEmail")
   @@index([roleId], map: "roleId")
@@ -184,13 +162,13 @@ model Roles {
 }
 
 model MovieFormats {
-  movieFormatId   Int       @id @default(autoincrement())
-  movieFormatName String    @db.VarChar(100)
-  createdAt       DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt       DateTime  @default(now()) @updatedAt @db.Timestamp(0)
-  isDeleted       Boolean?  @default(false)
-  deletedAt       DateTime? @db.Timestamp(0)
-  Movies          Movies[]
+  formatId   Int         @id @default(autoincrement())
+  formatName String      @db.VarChar(100)
+  createdAt  DateTime    @default(now()) @db.Timestamp(0)
+  updatedAt  DateTime    @default(now()) @updatedAt @db.Timestamp(0)
+  isDeleted  Boolean?    @default(false)
+  deletedAt  DateTime?   @db.Timestamp(0)
+  Showtimes  Showtimes[]
 }
 
 model MovieGenres {
@@ -207,20 +185,16 @@ model Rooms {
   roomId       Int           @id @default(autoincrement())
   roomName     String        @db.VarChar(100)
   totalSeat    Int?          @default(100)
-  cinemaId     Int?
   screenId     Int?
   soundId      Int?
   createdAt    DateTime      @default(now()) @db.Timestamp(0)
   updatedAt    DateTime      @default(now()) @updatedAt @db.Timestamp(0)
   isDeleted    Boolean?      @default(false)
   deletedAt    DateTime?     @db.Timestamp(0)
-  Cinemas      Cinemas?      @relation(fields: [cinemaId], references: [cinemaId], onDelete: Cascade)
   ScreenTechs  ScreenTechs?  @relation(fields: [screenId], references: [screenId], onDelete: Cascade, map: "Rooms_roomTypeId_fkey")
   SoundSystems SoundSystems? @relation(fields: [soundId], references: [soundId], onDelete: Cascade)
-  Seats        Seats[]
   Showtimes    Showtimes[]
 
-  @@index([cinemaId])
   @@index([screenId], map: "Rooms_roomTypeId_idx")
   @@index([soundId], map: "Rooms_soundId_fkey")
 }
@@ -228,11 +202,14 @@ model Rooms {
 model SeatTypes {
   seatTypeId   Int       @id @default(autoincrement())
   seatTypeName String    @db.VarChar(100)
+  multiplier   Decimal?  @default(1.00) @db.Decimal(5, 2)
   createdAt    DateTime  @default(now()) @db.Timestamp(0)
   updatedAt    DateTime  @default(now()) @updatedAt @db.Timestamp(0)
   isDeleted    Boolean?  @default(false)
   deletedAt    DateTime? @db.Timestamp(0)
   Seats        Seats[]
+
+  @@index([multiplier], map: "idx_SeatTypes_multiplier")
 }
 
 model AgeLimits {
@@ -247,44 +224,88 @@ model AgeLimits {
 }
 
 model CinemaAreas {
-  areaId    Int       @id @default(autoincrement())
-  areaName  String    @db.VarChar(100)
-  createdAt DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt DateTime  @default(now()) @db.Timestamp(0)
-  isDeleted Boolean?  @default(false)
-  deletedAt DateTime? @db.Timestamp(0)
-  Cinemas   Cinemas[]
+  areaId        Int       @id @default(autoincrement())
+  areaName      String    @db.VarChar(100)
+  priceAddition Int       @default(0)
+  createdAt     DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime  @default(now()) @db.Timestamp(0)
+  isDeleted     Boolean?  @default(false)
+  deletedAt     DateTime? @db.Timestamp(0)
+  Cinemas       Cinemas[]
 
   @@index([areaName], map: "idxClusterName")
 }
 
 model CinemaBrands {
-  brandId   Int       @id @default(autoincrement())
-  brandName String    @db.VarChar(100)
-  logo      String?   @db.VarChar(255)
-  createdAt DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt DateTime  @default(now()) @db.Timestamp(0)
-  isDeleted Boolean?  @default(false)
-  deletedAt DateTime? @db.Timestamp(0)
-  Cinemas   Cinemas[]
-}
-
-model ScreenTechs {
-  screenId   Int       @id @default(autoincrement())
-  screenName String    @db.VarChar(100)
+  brandId    Int       @id @default(autoincrement())
+  brandName  String    @db.VarChar(100)
+  logo       String?   @db.VarChar(255)
+  multiplier Decimal?  @default(1.00) @db.Decimal(5, 2)
   createdAt  DateTime  @default(now()) @db.Timestamp(0)
   updatedAt  DateTime  @default(now()) @db.Timestamp(0)
   isDeleted  Boolean?  @default(false)
   deletedAt  DateTime? @db.Timestamp(0)
-  Rooms      Rooms[]
+  Cinemas    Cinemas[]
+}
+
+model ScreenTechs {
+  screenId    Int       @id @default(autoincrement())
+  screenName  String    @db.VarChar(100)
+  description String?   @db.Text
+  multiplier  Decimal?  @default(1.00) @db.Decimal(5, 2)
+  createdAt   DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime  @default(now()) @db.Timestamp(0)
+  isDeleted   Boolean?  @default(false)
+  deletedAt   DateTime? @db.Timestamp(0)
+  Rooms       Rooms[]
 }
 
 model SoundSystems {
-  soundId   Int       @id @default(autoincrement())
-  soundName String    @db.VarChar(100)
-  createdAt DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt DateTime  @default(now()) @db.Timestamp(0)
-  isDeleted Boolean?  @default(false)
-  deletedAt DateTime? @db.Timestamp(0)
-  Rooms     Rooms[]
+  soundId     Int       @id @default(autoincrement())
+  soundName   String    @db.VarChar(100)
+  description String?   @db.Text
+  multiplier  Decimal?  @default(1.00) @db.Decimal(5, 2)
+  createdAt   DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime  @default(now()) @db.Timestamp(0)
+  isDeleted   Boolean?  @default(false)
+  deletedAt   DateTime? @db.Timestamp(0)
+  Rooms       Rooms[]
+}
+
+model Bookings {
+  bookingId       Int                     @id @default(autoincrement())
+  userId          Int
+  showtimeId      Int
+  seatId          Int
+  seatPrice       Int?                    @default(0)
+  isBooked        Boolean?                @default(false)
+  bookingDateTime DateTime?               @db.Timestamp(0)
+  paymentStatus   Bookings_paymentStatus? @default(PENDING)
+  paymentMethod   Bookings_paymentMethod?
+  transactionId   String?                 @db.VarChar(100)
+  paidAt          DateTime?               @db.Timestamp(0)
+  Seats           Seats                   @relation(fields: [seatId], references: [seatId], onDelete: Cascade, map: "Tickets_seatId_fkey")
+  Showtimes       Showtimes               @relation(fields: [showtimeId], references: [showtimeId], onDelete: Cascade, map: "Tickets_showtimeId_fkey")
+  Users           Users                   @relation(fields: [userId], references: [userId], onDelete: Cascade, map: "Tickets_userId_fkey")
+
+  @@index([seatId], map: "Tickets_seatId_idx")
+  @@index([showtimeId], map: "Tickets_showtimeId_idx")
+  @@index([userId], map: "Tickets_userId_fkey")
+}
+
+enum Bookings_paymentStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+enum Bookings_paymentMethod {
+  ATM_CARD
+  CREDIT_CARD
+  DEBIT_CARD
+  MOMO
+  ZALOPAY
+  VNPAY
+  SHOPEEPAY
+  APPLEPAY
 }

@@ -79,8 +79,8 @@ export class CinemaBrandController {
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete a cinema brand' })
   @MessageResponse('Cinema brand deleted successfully!')
-  softDelete(@Param('id') id: string) {
-    return this.service.softDelete(Number(id));
+  delete(@Param('id') id: string) {
+    return this.service.delete(Number(id));
   }
 
   // ------------------ RESTORE ------------------

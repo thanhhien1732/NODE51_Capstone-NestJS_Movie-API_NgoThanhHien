@@ -11,6 +11,12 @@ export class CinemaBrandService {
 
   // ------------------ CREATE ------------------
   async create(dto: CreateCinemaBrandDto, file?: Express.Multer.File) {
+    const brandExist = await this.prisma.cinemaBrands.findFirst({
+      where: { brandName: dto.brandName, isDeleted: false },
+    });
+
+    if (brandExist) throw new BadRequestException('Brand name already exists!');
+
     let logoId: string | null = null;
     let logoUrl: string | null = null;
 
@@ -19,7 +25,7 @@ export class CinemaBrandService {
 
       const uploadResult = await new Promise<any>((resolve, reject) => {
         cloudinary.uploader
-          .upload_stream({ folder: 'cinema-logos' }, (error, result) => {
+          .upload_stream({ folder: 'movie/cinema-logos' }, (error, result) => {
             if (error) return reject(error);
             resolve(result);
           })
@@ -33,14 +39,16 @@ export class CinemaBrandService {
     const newBrand = await this.prisma.cinemaBrands.create({
       data: {
         brandName: dto.brandName,
+        multiplier: dto.multiplier,
         logo: logoId,
       },
     });
 
     return {
-      brandId: newBrand.brandId,
-      brandName: newBrand.brandName,
+      id: newBrand.brandId,
+      name: newBrand.brandName,
       logo: logoUrl,
+      multiplier: newBrand.multiplier,
       createdAt: newBrand.createdAt,
     };
   }
@@ -63,7 +71,7 @@ export class CinemaBrandService {
         where,
         skip,
         take,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { brandId: 'desc' },
       }),
       this.prisma.cinemaBrands.count({ where }),
     ]);
@@ -75,9 +83,10 @@ export class CinemaBrandService {
       totalPage: hasPagination ? Math.ceil(totalItem / Number(pageSize)) : 1,
       keyword: keyword || null,
       items: items.map(i => ({
-        brandId: i.brandId,
-        brandName: i.brandName,
+        id: i.brandId,
+        name: i.brandName,
         logo: i.logo,
+        multiplier: i.multiplier,
         createdAt: i.createdAt,
         updatedAt: i.updatedAt,
       })),
@@ -86,20 +95,28 @@ export class CinemaBrandService {
 
   // ------------------ FIND ONE ------------------
   async findOne(id: number) {
-    const brand = await this.prisma.cinemaBrands.findUnique({
+    const brandExist = await this.prisma.cinemaBrands.findUnique({
       where: { brandId: id },
     });
 
-    if (!brand || brand.isDeleted)
+    if (!brandExist || brandExist.isDeleted)
       throw new NotFoundException('Cinema Brand not found');
 
-    return brand;
+    return {
+      id: brandExist.brandId,
+      name: brandExist.brandName,
+      logo: brandExist.logo,
+      multiplier: brandExist.multiplier,
+      createdAt: brandExist.createdAt,
+      updatedAt: brandExist.updatedAt,
+    }
   }
 
   // ------------------ UPDATE ------------------
   async update(id: number, dto: UpdateCinemaBrandDto, file?: Express.Multer.File) {
-    const brand = await this.prisma.cinemaBrands.findUnique({ where: { brandId: id } });
-    if (!brand || brand.isDeleted) throw new NotFoundException('Cinema brand not found');
+    const brandExist = await this.prisma.cinemaBrands.findUnique({ where: { brandId: id } });
+
+    if (!brandExist || brandExist.isDeleted) throw new NotFoundException('Cinema brand not found');
 
     if (dto.brandName) {
       const duplicate = await this.prisma.cinemaBrands.findFirst({
@@ -114,12 +131,7 @@ export class CinemaBrandService {
         throw new BadRequestException('A cinema brand with this name already exists!');
     }
 
-    await this.prisma.cinemaBrands.update({
-      where: { brandId: id },
-      data: dto,
-    });
-
-    let newLogoId = brand.logo;
+    let newLogoId = brandExist.logo;
     let newLogoUrl = null;
 
     if (file) {
@@ -127,7 +139,7 @@ export class CinemaBrandService {
 
       const uploadResult = await new Promise<any>((resolve, reject) => {
         cloudinary.uploader
-          .upload_stream({ folder: 'cinema-logos' }, (error, result) => {
+          .upload_stream({ folder: 'movie/cinema-logos' }, (error, result) => {
             if (error) return reject(error);
             resolve(result);
           })
@@ -137,9 +149,9 @@ export class CinemaBrandService {
       newLogoId = uploadResult.public_id;
       newLogoUrl = uploadResult.secure_url;
 
-      if (brand.logo) {
+      if (brandExist.logo) {
         try {
-          await cloudinary.uploader.destroy(brand.logo);
+          await cloudinary.uploader.destroy(brandExist.logo);
         } catch (e) {
           console.warn('Error deleting old logo:', e.message);
         }
@@ -156,23 +168,38 @@ export class CinemaBrandService {
     });
 
     return {
-      brandId: updatedBrand.brandId,
-      brandName: updatedBrand.brandName,
-      logo: newLogoUrl || (brand.logo ? `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/${newLogoId}.png` : null),
+      id: updatedBrand.brandId,
+      name: updatedBrand.brandName,
+      logo: newLogoUrl || (brandExist.logo ? `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/${newLogoId}.png` : null),
+      multiplier: updatedBrand.multiplier,
       updatedAt: updatedBrand.updatedAt,
     };
   }
 
   // ------------------ DELETE ------------------
-  async softDelete(id: number) {
-    const brand = await this.findOne(id);
-    return this.prisma.cinemaBrands.update({
-      where: { brandId: brand.brandId },
+  async delete(id: number) {
+    const brandExist = await this.prisma.cinemaBrands.findUnique({ where: { brandId: id } });
+
+    if (!brandExist) throw new NotFoundException('Cinema brand not found');
+
+    if (brandExist.isDeleted) throw new BadRequestException('This brand has already been deleted');
+
+    const deleted = await this.prisma.cinemaBrands.update({
+      where: { brandId: id },
       data: {
         isDeleted: true,
         deletedAt: new Date(),
-      },
+      }
     });
+
+    return {
+      id: deleted.brandId,
+      name: deleted.brandName,
+      logo: deleted.logo,
+      multiplier: deleted.multiplier,
+      isDeleted: deleted.isDeleted,
+      deletedAt: deleted.deletedAt,
+    }
   }
 
   // ------------------ RESTORE ------------------
@@ -182,11 +209,21 @@ export class CinemaBrandService {
     });
 
     if (!brand) throw new NotFoundException('Cinema Brand not found');
+
     if (!brand.isDeleted) throw new NotFoundException('Brand is not deleted');
 
-    return this.prisma.cinemaBrands.update({
+    const restored = await this.prisma.cinemaBrands.update({
       where: { brandId: id },
       data: { isDeleted: false, deletedAt: null },
     });
+
+    return {
+      id: restored.brandId,
+      name: restored.brandName,
+      logo: restored.logo,
+      multiplier: restored.multiplier,
+      isDeleted: restored.isDeleted,
+      deletedAt: restored.deletedAt,
+    }
   }
 }

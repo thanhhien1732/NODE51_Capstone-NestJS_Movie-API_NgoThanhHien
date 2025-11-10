@@ -10,12 +10,20 @@ export class CinemaAreaService {
 
   // ------------------ CREATE ------------------
   async create(dto: CreateCinemaAreaDto) {
-    const exists = await this.prisma.cinemaAreas.findFirst({
+    const areaExist = await this.prisma.cinemaAreas.findFirst({
       where: { areaName: dto.areaName, isDeleted: false },
     });
-    if (exists) throw new BadRequestException('This cinema area already exists');
 
-    return this.prisma.cinemaAreas.create({ data: dto });
+    if (areaExist) throw new BadRequestException('This cinema area already exists');
+
+    const newArea = await this.prisma.cinemaAreas.create({ data: dto, });
+
+    return {
+      id: newArea.areaId,
+      name: newArea.areaName,
+      priceAddition: newArea.priceAddition,
+      createdAt: newArea.createdAt,
+    }
   }
 
   // ------------------ FIND ALL ------------------
@@ -36,7 +44,7 @@ export class CinemaAreaService {
         where,
         skip,
         take,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { areaId: 'desc' },
       }),
       this.prisma.cinemaAreas.count({ where }),
     ]);
@@ -47,21 +55,36 @@ export class CinemaAreaService {
       totalItem,
       totalPage: hasPagination ? Math.ceil(totalItem / Number(pageSize)) : 1,
       keyword: keyword || null,
-      items,
+      items: items.map(i => ({
+        id: i.areaId,
+        name: i.areaName,
+        priceAddition: i.priceAddition,
+        createdAt: i.createdAt,
+        updatedAt: i.updatedAt,
+      })),
     };
   }
 
   // ------------------ FIND ONE ------------------
   async findOne(id: number) {
-    const area = await this.prisma.cinemaAreas.findUnique({ where: { areaId: id } });
-    if (!area || area.isDeleted) throw new NotFoundException('Cinema area not found');
-    return area;
+    const areaExist = await this.prisma.cinemaAreas.findUnique({ where: { areaId: id } });
+
+    if (!areaExist || areaExist.isDeleted) throw new NotFoundException('Cinema area not found');
+
+    return {
+      id: areaExist.areaId,
+      name: areaExist.areaName,
+      priceAddition: areaExist.priceAddition,
+      createdAt: areaExist.createdAt,
+      updatedAt: areaExist.updatedAt,
+    };
   }
 
   // ------------------ UPDATE ------------------
   async update(id: number, dto: UpdateCinemaAreaDto) {
-    const area = await this.prisma.cinemaAreas.findUnique({ where: { areaId: id } });
-    if (!area || area.isDeleted) throw new NotFoundException('Cinema area not found');
+    const areaExist = await this.prisma.cinemaAreas.findUnique({ where: { areaId: id } });
+
+    if (!areaExist || areaExist.isDeleted) throw new NotFoundException('Cinema area not found');
 
     if (dto.areaName) {
       const duplicate = await this.prisma.cinemaAreas.findFirst({
@@ -76,48 +99,66 @@ export class CinemaAreaService {
         throw new BadRequestException('A cinema area with this name already exists!');
     }
 
-    await this.prisma.cinemaAreas.update({
+    const updated = await this.prisma.cinemaAreas.update({
       where: { areaId: id },
       data: dto,
     });
 
-    return this.prisma.cinemaAreas.update({
-      where: { areaId: id },
-      data: {
-        ...(dto.areaName ? { areaName: dto.areaName } : {}),
-        updatedAt: new Date(),
-      },
-    });
+    return {
+      id: updated.areaId,
+      name: updated.areaName,
+      priceAddition: updated.priceAddition,
+      updatedAt: updated.updatedAt,
+    };
   }
 
   // ------------------ DELETE ------------------
   async delete(id: number) {
-    const area = await this.prisma.cinemaAreas.findUnique({ where: { areaId: id } });
-    if (!area) throw new NotFoundException('Cinema area not found');
-    if (area.isDeleted) throw new BadRequestException('This area has already been deleted');
+    const areaExist = await this.prisma.cinemaAreas.findUnique({ where: { areaId: id } });
 
-    return this.prisma.cinemaAreas.update({
+    if (!areaExist) throw new NotFoundException('Cinema area not found');
+
+    if (areaExist.isDeleted) throw new BadRequestException('This cinema area has already been deleted');
+
+    const deleted = await this.prisma.cinemaAreas.update({
       where: { areaId: id },
       data: {
         isDeleted: true,
         deletedAt: new Date(),
       },
     });
+
+    return {
+      id: deleted.areaId,
+      name: deleted.areaName,
+      priceAddition: deleted.priceAddition,
+      isDeleted: deleted.isDeleted,
+      deletedAt: deleted.deletedAt,
+    };
   }
 
   // ------------------ RESTORE ------------------
   async restore(id: number) {
-    const area = await this.prisma.cinemaAreas.findUnique({ where: { areaId: id } });
-    if (!area) throw new NotFoundException('Cinema area not found');
-    if (!area.isDeleted) throw new BadRequestException('This area is not deleted');
+    const areaExist = await this.prisma.cinemaAreas.findUnique({ where: { areaId: id } });
 
-    return this.prisma.cinemaAreas.update({
+    if (!areaExist) throw new NotFoundException('Cinema area not found');
+
+    if (!areaExist.isDeleted) throw new BadRequestException('This cinema area is not deleted!');
+
+    const restored = await this.prisma.cinemaAreas.update({
       where: { areaId: id },
       data: {
         isDeleted: false,
         deletedAt: null,
-        updatedAt: new Date(),
       },
     });
+
+    return {
+      id: restored.areaId,
+      name: restored.areaName,
+      priceAddition: restored.priceAddition,
+      isDeleted: restored.isDeleted,
+      deletedAt: restored.deletedAt,
+    };
   }
 }

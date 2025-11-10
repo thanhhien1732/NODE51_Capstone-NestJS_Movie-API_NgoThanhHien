@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class UpdateCinemaAreaDto {
     @ApiPropertyOptional({
@@ -9,4 +9,10 @@ export class UpdateCinemaAreaDto {
     @IsOptional()
     @IsString()
     areaName?: string;
+
+    @ApiPropertyOptional({ example: 10000, description: 'Giá trênh lệch của khu vực' })
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    priceAddition?: number;
 }

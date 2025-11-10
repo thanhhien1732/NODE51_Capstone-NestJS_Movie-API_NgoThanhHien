@@ -14,6 +14,7 @@ import { Public } from 'src/common/decorators/public.decorator';
 export class RoleController {
   constructor(private readonly roleService: RoleService) { }
 
+  // ------------------ CREATE ------------------
   @Post()
   @ApiOperation({ summary: 'Create new role' })
   @MessageResponse('Role created successfully!')
@@ -21,6 +22,7 @@ export class RoleController {
     return this.roleService.create(dto);
   }
 
+  // ------------------ FIND ALL ------------------
   @Get()
   @Public()
   @SkipPermission()
@@ -32,6 +34,7 @@ export class RoleController {
     return this.roleService.findAll(findAllRoleDto);
   }
 
+  // ------------------ ASSIGN PERMISSIONS ------------------
   @Post('assign-permissions')
   @ApiOperation({ summary: 'Assign permissions to a role' })
   @MessageResponse('Permissions assigned successfully!')
@@ -43,6 +46,7 @@ export class RoleController {
     return this.roleService.assignPermissions(Number(roleId), ids);
   }
 
+  // ------------------ FIND ONE ------------------
   @Get(':id')
   @ApiOperation({ summary: 'Get role by ID' })
   @MessageResponse('Role retrieved successfully!')
@@ -50,6 +54,7 @@ export class RoleController {
     return this.roleService.findOne(id);
   }
 
+  // ------------------ UPDATE ------------------
   @Put(':id')
   @ApiOperation({ summary: 'Update role' })
   @MessageResponse('Role updated successfully!')
@@ -57,6 +62,7 @@ export class RoleController {
     return this.roleService.update(id, dto);
   }
 
+  // ------------------ DELETE ------------------
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete role' })
   @MessageResponse('Role deleted successfully!')
@@ -64,6 +70,7 @@ export class RoleController {
     return this.roleService.delete(id);
   }
 
+  // ------------------ RESTORE ------------------
   @Post(':id')
   @ApiOperation({ summary: 'Restore role' })
   @MessageResponse('Role restored successfully!')

@@ -10,7 +10,7 @@ export class CinemaService {
 
   // ------------------ CREATE ------------------
   async create(dto: CreateCinemaDto) {
-    const existing = await this.prisma.cinemas.findFirst({
+    const cinemaExist = await this.prisma.cinemas.findFirst({
       where: {
         cinemaName: dto.cinemaName,
         brandId: dto.brandId ?? undefined,
@@ -19,14 +19,25 @@ export class CinemaService {
       },
     });
 
-    if (existing) {
+    if (cinemaExist) {
       throw new BadRequestException('Cinema with this name already exists in this brand/area!');
     }
 
-    const cinema = await this.prisma.cinemas.create({ data: dto });
+    const newCinema = await this.prisma.cinemas.create({
+      data: dto,
+      include: {
+        CinemaBrands: { select: { brandName: true } },
+        CinemaAreas: { select: { areaName: true } },
+      },
+    });
 
     return {
-      cinemaId: cinema.cinemaId,
+      cinemaId: newCinema.cinemaId,
+      cinemaName: newCinema.cinemaName,
+      totalRoom: newCinema.totalRoom,
+      brandName: newCinema.CinemaBrands?.brandName ?? null,
+      areaName: newCinema.CinemaAreas?.areaName ?? null,
+      createAt: newCinema.createdAt,
     };
   }
 
@@ -54,7 +65,7 @@ export class CinemaService {
           CinemaBrands: { select: { brandName: true } },
           CinemaAreas: { select: { areaName: true } },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { cinemaId: 'desc' },
       }),
       this.prisma.cinemas.count({ where }),
     ]);
@@ -79,28 +90,37 @@ export class CinemaService {
 
   // ------------------ FIND ONE ------------------
   async findOne(id: number) {
-    const cinema = await this.prisma.cinemas.findFirst({
+    const cinemaExist = await this.prisma.cinemas.findFirst({
       where: { cinemaId: id, isDeleted: false },
-      include: { CinemaAreas: true, CinemaBrands: true, Rooms: true, Movies: true },
+      include: { CinemaAreas: true, CinemaBrands: true, },
     });
-    if (!cinema) throw new NotFoundException('Cinema not found');
-    return cinema;
+
+    if (!cinemaExist) throw new NotFoundException('Cinema not found');
+
+    return {
+      cinemaId: cinemaExist.cinemaId,
+      cinemaName: cinemaExist.cinemaName,
+      totalRoom: cinemaExist.totalRoom,
+      brandName: cinemaExist.CinemaBrands?.brandName ?? null,
+      areaName: cinemaExist.CinemaAreas?.areaName ?? null,
+      createAt: cinemaExist.createdAt,
+    };
   }
 
   // ------------------ UPDATE ------------------
   async update(id: number, dto: UpdateCinemaDto) {
-    const cinema = await this.prisma.cinemas.findUnique({
+    const cinemaExist = await this.prisma.cinemas.findUnique({
       where: { cinemaId: id },
     });
-    if (!cinema || cinema.isDeleted)
+    if (!cinemaExist || cinemaExist.isDeleted)
       throw new NotFoundException('Cinema not found!');
 
     if (dto.cinemaName) {
       const duplicate = await this.prisma.cinemas.findFirst({
         where: {
           cinemaName: dto.cinemaName,
-          brandId: dto.brandId ?? cinema.brandId,
-          areaId: dto.areaId ?? cinema.areaId,
+          brandId: dto.brandId ?? cinemaExist.brandId,
+          areaId: dto.areaId ?? cinemaExist.areaId,
           isDeleted: false,
           NOT: { cinemaId: id },
         },
@@ -113,41 +133,82 @@ export class CinemaService {
       }
     }
 
-    await this.prisma.cinemas.update({
+    const updated = await this.prisma.cinemas.update({
       where: { cinemaId: id },
       data: dto,
+      include: {
+        CinemaBrands: { select: { brandName: true } },
+        CinemaAreas: { select: { areaName: true } },
+      },
     });
 
-    return;
+    return {
+      cinemaId: updated.cinemaId,
+      cinemaName: updated.cinemaName,
+      totalRoom: updated.totalRoom,
+      brandName: updated.CinemaBrands?.brandName ?? null,
+      areaName: updated.CinemaAreas?.areaName ?? null,
+      updatedAt: updated.updatedAt,
+    }
   }
 
   // ------------------ DELETE ------------------
-  async remove(id: number, deletedBy?: string) {
-    const exist = await this.prisma.cinemas.findFirst({
-      where: { cinemaId: id, isDeleted: false },
-      select: { cinemaId: true },
+  async remove(id: number) {
+    const cinemaExist = await this.prisma.cinemas.findUnique({
+      where: { cinemaId: id },
     });
-    if (!exist) throw new NotFoundException('Cinema not found or already deleted');
 
-    await this.prisma.cinemas.update({
+    if (!cinemaExist) throw new NotFoundException('Cinema not found');
+
+    if (cinemaExist.isDeleted) throw new BadRequestException('Cinema already deleted');
+
+    const deleted = await this.prisma.cinemas.update({
       where: { cinemaId: id },
       data: { isDeleted: true, deletedAt: new Date() },
+      include: {
+        CinemaBrands: { select: { brandName: true } },
+        CinemaAreas: { select: { areaName: true } },
+      },
     });
-    return { message: 'Deleted' };
+
+    return {
+      cinemaId: deleted.cinemaId,
+      cinemaName: deleted.cinemaName,
+      totalRoom: deleted.totalRoom,
+      brandName: deleted.CinemaBrands?.brandName ?? null,
+      areaName: deleted.CinemaAreas?.areaName ?? null,
+      isDeleted: deleted.isDeleted,
+      deletedAt: deleted.deletedAt,
+    }
   }
 
   // ------------------ RESTORE ------------------
   async restore(id: number) {
-    const exist = await this.prisma.cinemas.findFirst({
-      where: { cinemaId: id, isDeleted: true },
-      select: { cinemaId: true },
+    const cinemaExist = await this.prisma.cinemas.findUnique({
+      where: { cinemaId: id },
     });
-    if (!exist) throw new NotFoundException('Cinema is not in deleted state');
 
-    await this.prisma.cinemas.update({
+    if (!cinemaExist) throw new NotFoundException('Cinema not found');
+
+    if (!cinemaExist.isDeleted) throw new BadRequestException('Cinema is not deleted');
+
+    const restored = await this.prisma.cinemas.update({
       where: { cinemaId: id },
       data: { isDeleted: false, deletedAt: null },
+      include: {
+        CinemaBrands: { select: { brandName: true } },
+        CinemaAreas: { select: { areaName: true } },
+      },
     });
-    return { message: 'Restored' };
+
+    return {
+      cinemaId: restored.cinemaId,
+      cinemaName: restored.cinemaName,
+      totalRoom: restored.totalRoom,
+      brandName: restored.CinemaBrands?.brandName ?? null,
+      areaName: restored.CinemaAreas?.areaName ?? null,
+      isDeleted: restored.isDeleted,
+      deletedAt: restored.deletedAt,
+    }
   }
 }

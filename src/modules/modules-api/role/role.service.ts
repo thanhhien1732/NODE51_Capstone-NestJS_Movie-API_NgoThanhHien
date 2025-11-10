@@ -8,13 +8,13 @@ import { FindAllRoleDto } from './dto/find-all-role.dto';
 export class RoleService {
   constructor(private readonly prisma: PrismaService) { }
 
-  // ------------------ CREATE ROLE ------------------
+  // ------------------ CREATE ------------------
   async create(createRoleDto: CreateRoleDto) {
-    const exist = await this.prisma.roles.findFirst({
+    const roleExist = await this.prisma.roles.findFirst({
       where: { roleName: createRoleDto.roleName },
     });
 
-    if (exist) throw new BadRequestException('Role already exists!');
+    if (roleExist) throw new BadRequestException('Role already exists!');
 
     return this.prisma.roles.create({
       data: {
@@ -24,7 +24,7 @@ export class RoleService {
     });
   }
 
-  // ------------------ FIND ALL ROLE  ------------------
+  // ------------------ FIND ALL ------------------
   async findAll(query: FindAllRoleDto) {
     const { page, pageSize, keyword } = query;
 
@@ -45,7 +45,7 @@ export class RoleService {
           isDeleted: false,
           ...searchCondition,
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { roleId: 'desc' },
       });
 
       return {
@@ -66,7 +66,7 @@ export class RoleService {
           isDeleted: false,
           ...searchCondition,
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { roleId: 'desc' },
       }),
 
       this.prisma.roles.count({
@@ -91,12 +91,13 @@ export class RoleService {
 
   // ------------------ ASSIGN PERMISSIONS ------------------
   async assignPermissions(roleId: number, permissionIds: number[]) {
-    const existing = await this.prisma.rolePermission.findMany({
+    const roleExist = await this.prisma.rolePermission.findMany({
       where: { roleId },
       select: { permissionId: true },
     });
 
-    const existingIds = existing.map((p) => p.permissionId);
+    const existingIds = roleExist.map((p) => p.permissionId);
+
     const newIds = permissionIds.filter((id) => !existingIds.includes(id));
 
     if (newIds.length === 0) {
@@ -108,14 +109,12 @@ export class RoleService {
       permissionId,
     }));
 
-    await this.prisma.rolePermission.createMany({ data });
-
-    return
+    return this.prisma.rolePermission.createMany({ data });
   }
 
-  // ------------------ GET ONE ------------------
+  // ------------------ FIND ONE ------------------
   async findOne(id: number) {
-    const role = await this.prisma.roles.findUnique({
+    const roleExist = await this.prisma.roles.findUnique({
       where: { roleId: id },
       include: {
         RolePermission: {
@@ -124,14 +123,16 @@ export class RoleService {
       },
     });
 
-    if (!role) throw new BadRequestException('Role not found');
-    return role;
+    if (!roleExist) throw new BadRequestException('Role not found');
+
+    return roleExist;
   }
 
-  // ------------------ UPDATE ROLE ------------------
+  // ------------------ UPDATE ------------------
   async update(id: number, dto: UpdateRoleDto) {
-    const found = await this.prisma.roles.findUnique({ where: { roleId: id } });
-    if (!found || found.isDeleted) {
+    const roleExist = await this.prisma.roles.findUnique({ where: { roleId: id } });
+
+    if (!roleExist || roleExist.isDeleted) {
       throw new NotFoundException('Role not found!');
     }
 
@@ -143,59 +144,52 @@ export class RoleService {
           NOT: { roleId: id },
         },
       });
+
       if (dup) throw new BadRequestException('Role name already exists!');
     }
 
-    await this.prisma.roles.update({
+    return this.prisma.roles.update({
       where: { roleId: id },
       data: dto,
     });
-
-    return;
   }
 
-  // ------------------ DELETE ROLE ------------------
+  // ------------------ DELETE ------------------
   async delete(id: number) {
-    const role = await this.prisma.roles.findUnique({ where: { roleId: id } });
+    const roleExist = await this.prisma.roles.findUnique({ where: { roleId: id } });
 
-    if (!role) {
+    if (!roleExist) {
       throw new NotFoundException('Role not found.');
     }
 
-    if (role.isDeleted || role.deletedAt !== null) {
+    if (roleExist.isDeleted) {
       throw new BadRequestException('This role has already been deleted.');
     }
 
-    const deletedRole = await this.prisma.roles.update({
+    return this.prisma.roles.update({
       where: { roleId: id },
       data: {
         isDeleted: true,
         deletedAt: new Date(),
       },
     });
-
-    return
   }
 
-  // ------------------ RESTORE ROLE ------------------
+  // ------------------ RESTORE ------------------
   async restoreRole(roleId: number) {
-    const role = await this.prisma.roles.findUnique({ where: { roleId } });
+    const roleExist = await this.prisma.roles.findUnique({ where: { roleId } });
 
-    if (!role) {
+    if (!roleExist) {
       throw new NotFoundException('Role not found.');
     }
 
-    if (role.deletedAt === null) {
+    if (roleExist.isDeleted) {
       throw new BadRequestException('This role is already active.');
     }
 
-    const restored = await this.prisma.roles.update({
+    return this.prisma.roles.update({
       where: { roleId },
       data: { isDeleted: false, deletedAt: null },
     });
-
-    return {
-      restored,
-    };
   }
 }
