@@ -28,7 +28,7 @@ import { PaymentModule } from './modules/modules-api/booking-payment/booking-pay
 import { BookingExpirationJob } from './common/jobs/booking-expiration.job';
 
 @Module({
-  imports: [PrismaModule, TokenModule, AuthModule, UserModule, RoleModule, PermissionModule, CinemaModule, CinemaBrandModule, CinemaAreaModule, RoomsModule, ScreenTechModule, SoundSystemModule, SeatModule, SeatTypeModule, MovieModule, MoveFormatModule, MovieGenreModule, AgeLimitModule, ShowtimeModule, BookingModule, ScheduleModule.forRoot(), PaymentModule],
+  imports: [PrismaModule, TokenModule, AuthModule, UserModule, RoleModule, PermissionModule, CinemaModule, CinemaBrandModule, CinemaAreaModule, RoomsModule, ScreenTechModule, SoundSystemModule, SeatTypeModule, SeatModule, MovieModule, MoveFormatModule, MovieGenreModule, AgeLimitModule, ShowtimeModule, BookingModule, ScheduleModule.forRoot(), PaymentModule],
   controllers: [AppController],
   providers: [AppService, ProtectStrategy, PermissionStrategy, BookingExpirationJob],
 })
