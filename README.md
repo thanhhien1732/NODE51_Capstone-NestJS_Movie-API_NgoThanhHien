@@ -160,7 +160,7 @@ http://localhost:3069/api/docs
 | POST | `/api/user/avatar` | Upload user avatar |
 | DELETE | `/api/user/avatar` | Delete user avatar |
 | GET | `/api/user` | Get all users (pagination + search) |
-| GET | `/api/user/{userId}` | Get user detail by ID |
+| GET | `/api/user/{id}` | Get user detail by ID |
 
 ### 🧱 Role (7 APIs)
 | Method | Endpoint | Description |

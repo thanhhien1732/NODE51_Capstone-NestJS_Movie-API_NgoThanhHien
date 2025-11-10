@@ -99,11 +99,11 @@ export class UsersController {
   }
 
   // ------------------ Find User By Id ------------------
-  @Get(':userId')
+  @Get(':id')
   @Public()
   @ApiOperation({ summary: 'Find user detail by id' })
   @MessageResponse('User detail retrieved successfully!')
-  findById(@Param('userId', ParseIntPipe) userId: number) {
-    return this.userService.findById(userId);
+  findById(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findById(id);
   }
 }

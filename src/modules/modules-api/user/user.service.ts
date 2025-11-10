@@ -221,9 +221,9 @@ export class UserService {
   }
 
   // ------------------ Find User By Id ------------------
-  async findById(userId: number) {
+  async findById(id: number) {
     const userExist = await this.prisma.users.findUnique({
-      where: { userId },
+      where: { userId: id },
       select: {
         userId: true,
         fullName: true,
