@@ -1,4 +1,4 @@
-# 🎬 Capstone Movie Booking API
+# 🎬 Capstone NestJS (Movie API)
 
 ## 🧩 Overview
 This is a **Cinema Movie Booking System API** built with **NestJS**, **Prisma ORM**, and **MySQL**. It supports full CRUD, soft delete, restore, authentication with JWT, role & permission management, and a payment gateway simulation for online movie ticket booking. The project follows clean modular architecture for scalability and reusability.
