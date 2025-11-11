@@ -2,7 +2,6 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from 'src/modules/modules-system/prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { FindAllBookingDto } from './dto/find-all-booking.dto';
-import { $Enums } from 'generated/prisma';
 
 @Injectable()
 export class BookingService {

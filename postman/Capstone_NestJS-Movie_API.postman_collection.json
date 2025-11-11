@@ -1,0 +1,2023 @@
+{
+    "info": {
+        "_postman_id": "1d2f6d02-8a64-47b4-96de-9dfd087eac05",
+        "name": "Capstone_NestJS-Movie_API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "46604225"
+    },
+    "item": [
+        {
+            "name": "01_Auth",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/register?email=user@gmail.com&password=123456&fullName=User%20Test",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "user@gmail.com"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "123456"
+                                },
+                                {
+                                    "key": "fullName",
+                                    "value": "User Test"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const data = pm.response.json();",
+                                    "console.log(data);",
+                                    "",
+                                    "if (data && data.data) {",
+                                    "  pm.globals.set('accessToken', data.data.accessToken);",
+                                    "  pm.globals.set('refreshToken', data.data.refreshToken);",
+                                    "  console.log('Tokens saved globally');",
+                                    "} else {",
+                                    "  console.warn('Token data not found in response');",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/login?email=user@gmail.com&password=123456",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "user@gmail.com"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "123456"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Refresh Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const data = pm.response.json();",
+                                    "console.log(data);",
+                                    "",
+                                    "if (data && data.data) {",
+                                    "  pm.globals.set('accessToken', data.data.accessToken);",
+                                    "  pm.globals.set('refreshToken', data.data.refreshToken);",
+                                    "  console.log('Tokens refreshed and saved');",
+                                    "} else {",
+                                    "  console.warn('Refresh token response invalid');",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"accessToken\": \"{{accessToken}}\",\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+                        },
+                        "url": "{{baseUrl}}/api/auth/refresh-token"
+                    }
+                },
+                {
+                    "name": "Get Info",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/auth/get-info"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "02_User",
+            "item": [
+                {
+                    "name": "Get All Users",
+                    "request": {
+                        "method": "GET",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/user?page=1&pageSize=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "pageSize",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User by ID",
+                    "request": {
+                        "method": "GET",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/user/1"
+                    }
+                },
+                {
+                    "name": "Update User",
+                    "request": {
+                        "method": "PUT",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/user/update?fullName=Nguyen%20Van%20B&email=newemail@gmail.com&phoneNumber=0909555999",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "update"
+                            ],
+                            "query": [
+                                {
+                                    "key": "fullName",
+                                    "value": "Nguyen Van B"
+                                },
+                                {
+                                    "key": "email",
+                                    "value": "newemail@gmail.com"
+                                },
+                                {
+                                    "key": "phoneNumber",
+                                    "value": "0909555999"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Change Password",
+                    "request": {
+                        "method": "POST",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/user/change-password?oldPassword=123456&newPassword=abcdef",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "change-password"
+                            ],
+                            "query": [
+                                {
+                                    "key": "oldPassword",
+                                    "value": "123456"
+                                },
+                                {
+                                    "key": "newPassword",
+                                    "value": "abcdef"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Upload Avatar",
+                    "request": {
+                        "method": "POST",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "C:/Users/LENOVO/Downloads/sample.png"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/user/avatar"
+                    }
+                },
+                {
+                    "name": "Delete User Avatar",
+                    "request": {
+                        "method": "DELETE",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/user/avatar"
+                    }
+                },
+                {
+                    "name": "Soft Delete User",
+                    "request": {
+                        "method": "DELETE",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/user/delete?email=user@gmail.com"
+                    }
+                },
+                {
+                    "name": "Restore Deleted User",
+                    "request": {
+                        "method": "POST",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/user/restore?email=user@gmail.com",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "restore"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "user@gmail.com"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "03_Role",
+            "item": [
+                {
+                    "name": "Get All Roles",
+                    "request": {
+                        "method": "GET",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/role"
+                    }
+                },
+                {
+                    "name": "Get Role Detail",
+                    "request": {
+                        "method": "GET",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/role/1"
+                    }
+                },
+                {
+                    "name": "Create Role",
+                    "request": {
+                        "method": "POST",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/role?roleName=Manager&description=Quản%20lý%20rạp",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "role"
+                            ],
+                            "query": [
+                                {
+                                    "key": "roleName",
+                                    "value": "Manager"
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "Quản lý rạp"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Role",
+                    "request": {
+                        "method": "PUT",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/role/1?roleName=Admin%20Cinema&description=Chỉnh%20sửa%20thông%20tin%20rạp",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "role",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "roleName",
+                                    "value": "Admin Cinema"
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "Chỉnh sửa thông tin rạp"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Role",
+                    "request": {
+                        "method": "DELETE",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/role/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Role",
+                    "request": {
+                        "method": "POST",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/role/1/restore"
+                    }
+                },
+                {
+                    "name": "Assign Permissions to Role",
+                    "request": {
+                        "method": "POST",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/role/assign-permissions?roleId=1&permissionIds=1,2,3",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "role",
+                                "assign-permissions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "roleId",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "permissionIds",
+                                    "value": "1,2,3"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "04_Permission",
+            "item": [
+                {
+                    "name": "Get All Permissions",
+                    "request": {
+                        "method": "GET",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/permission"
+                    }
+                },
+                {
+                    "name": "Get Permission by ID",
+                    "request": {
+                        "method": "GET",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/permission/1"
+                    }
+                },
+                {
+                    "name": "Create Permission",
+                    "request": {
+                        "method": "POST",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/permission?name=Create%20Cinema&endpoint=/api/cinema&method=POST&module=Cinema",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "permission"
+                            ],
+                            "query": [
+                                {
+                                    "key": "name",
+                                    "value": "Create Cinema"
+                                },
+                                {
+                                    "key": "endpoint",
+                                    "value": "/api/cinema"
+                                },
+                                {
+                                    "key": "method",
+                                    "value": "POST"
+                                },
+                                {
+                                    "key": "module",
+                                    "value": "Cinema"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Permission",
+                    "request": {
+                        "method": "PUT",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/permission/1?name=Update%20Cinema&method=PUT",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "permission",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "name",
+                                    "value": "Update Cinema"
+                                },
+                                {
+                                    "key": "method",
+                                    "value": "PUT"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soft Delete Permission",
+                    "request": {
+                        "method": "DELETE",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/permission/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Permission",
+                    "request": {
+                        "method": "POST",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/permission/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "05_Cinema",
+            "item": [
+                {
+                    "name": "Get All Cinemas",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/cinema?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get Cinema by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/cinema/1"
+                    }
+                },
+                {
+                    "name": "Create Cinema",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/cinema?cinemaName=Galaxy%20Quang%20Trung&brandId=1&areaId=2",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cinema"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cinemaName",
+                                    "value": "Galaxy Quang Trung"
+                                },
+                                {
+                                    "key": "brandId",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "areaId",
+                                    "value": "2"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Cinema",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/cinema/1?cinemaName=Galaxy%20Nguyen%20Du",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cinema",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "cinemaName",
+                                    "value": "Galaxy Nguyen Du"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soft Delete Cinema",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/cinema/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Cinema",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/cinema/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "06_CinemaBrand",
+            "item": [
+                {
+                    "name": "Get All Cinema Brands",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/cinema-brands"
+                    }
+                },
+                {
+                    "name": "Get Cinema Brand by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/cinema-brands/1"
+                    }
+                },
+                {
+                    "name": "Create Cinema Brand",
+                    "request": {
+                        "method": "POST",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "brandName",
+                                    "value": "CGV",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "C:/Users/LENOVO/Downloads/sample.png"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/cinema-brands"
+                    }
+                },
+                {
+                    "name": "Update Cinema Brand",
+                    "request": {
+                        "method": "PUT",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "brandName",
+                                    "value": "Lotte Cinema",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "C:/Users/LENOVO/Downloads/sample.png"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/cinema-brands/1"
+                    }
+                },
+                {
+                    "name": "Soft Delete Cinema Brand",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/cinema-brands/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Cinema Brand",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/cinema-brands/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "07_CinemaArea",
+            "item": [
+                {
+                    "name": "Get All Cinema Areas",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/cinema-areas?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get Cinema Area by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/cinema-areas/1"
+                    }
+                },
+                {
+                    "name": "Create Cinema Area",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/cinema-areas?areaName=TPHCM",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cinema-areas"
+                            ],
+                            "query": [
+                                {
+                                    "key": "areaName",
+                                    "value": "TPHCM"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Cinema Area",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/cinema-areas/1?areaName=Ha%20Noi",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "cinema-areas",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "areaName",
+                                    "value": "Ha Noi"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soft Delete Cinema Area",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/cinema-areas/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Cinema Area",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/cinema-areas/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "08_Room",
+            "item": [
+                {
+                    "name": "Get All Rooms",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/room?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get Room by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/room/1"
+                    }
+                },
+                {
+                    "name": "Create Room",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/room?roomName=Room%201&cinemaId=1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "room"
+                            ],
+                            "query": [
+                                {
+                                    "key": "roomName",
+                                    "value": "Room 1"
+                                },
+                                {
+                                    "key": "cinemaId",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Room",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/room/1?roomName=Room%201%20Deluxe",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "room",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "roomName",
+                                    "value": "Room 1 Deluxe"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soft Delete Room",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/room/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Room",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/room/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "09_ScreenTech",
+            "item": [
+                {
+                    "name": "Get All ScreenTech",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/screen-tech?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get ScreenTech by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/screen-tech/1"
+                    }
+                },
+                {
+                    "name": "Create ScreenTech",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/screen-tech?screenTechName=IMAX&multiplier=2.0",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "screen-tech"
+                            ],
+                            "query": [
+                                {
+                                    "key": "screenTechName",
+                                    "value": "IMAX"
+                                },
+                                {
+                                    "key": "multiplier",
+                                    "value": "2.0"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update ScreenTech",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/screen-tech/1?screenTechName=4DX&multiplier=1.8",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "screen-tech",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "screenTechName",
+                                    "value": "4DX"
+                                },
+                                {
+                                    "key": "multiplier",
+                                    "value": "1.8"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soft Delete ScreenTech",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/screen-tech/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted ScreenTech",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/screen-tech/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "10_SoundSystem",
+            "item": [
+                {
+                    "name": "Get All Sound Systems",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/sound-system?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get Sound System by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/sound-system/1"
+                    }
+                },
+                {
+                    "name": "Create Sound System",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/sound-system?soundSystemName=Dolby%20Atmos&multiplier=1.5",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sound-system"
+                            ],
+                            "query": [
+                                {
+                                    "key": "soundSystemName",
+                                    "value": "Dolby Atmos"
+                                },
+                                {
+                                    "key": "multiplier",
+                                    "value": "1.5"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Sound System",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/sound-system/1?soundSystemName=IMAX%20Sound&multiplier=2.0",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sound-system",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "soundSystemName",
+                                    "value": "IMAX Sound"
+                                },
+                                {
+                                    "key": "multiplier",
+                                    "value": "2.0"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soft Delete Sound System",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/sound-system/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Sound System",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/sound-system/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "11_SeatType",
+            "item": [
+                {
+                    "name": "Get All Seat Types",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/seat-type?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get Seat Type by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/seat-type/1"
+                    }
+                },
+                {
+                    "name": "Create Seat Type",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/seat-type?seatTypeName=VIP&multiplier=1.3",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "seat-type"
+                            ],
+                            "query": [
+                                {
+                                    "key": "seatTypeName",
+                                    "value": "VIP"
+                                },
+                                {
+                                    "key": "multiplier",
+                                    "value": "1.3"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Seat Type",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/seat-type/1?seatTypeName=Deluxe&multiplier=1.5",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "seat-type",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "seatTypeName",
+                                    "value": "Deluxe"
+                                },
+                                {
+                                    "key": "multiplier",
+                                    "value": "1.5"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soft Delete Seat Type",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/seat-type/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Seat Type",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/seat-type/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "12_Seat",
+            "item": [
+                {
+                    "name": "Get All Seats",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/seat?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get Seat by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/seat/1"
+                    }
+                },
+                {
+                    "name": "Create Seat",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/seat?seatName=A1&rowLabel=A&columnIndex=1&seatTypeId=2",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "seat"
+                            ],
+                            "query": [
+                                {
+                                    "key": "seatName",
+                                    "value": "A1"
+                                },
+                                {
+                                    "key": "rowLabel",
+                                    "value": "A"
+                                },
+                                {
+                                    "key": "columnIndex",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "seatTypeId",
+                                    "value": "2"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Seat",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/seat/1?seatName=A2&rowLabel=A&columnIndex=2&seatTypeId=1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "seat",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "seatName",
+                                    "value": "A2"
+                                },
+                                {
+                                    "key": "rowLabel",
+                                    "value": "A"
+                                },
+                                {
+                                    "key": "columnIndex",
+                                    "value": "2"
+                                },
+                                {
+                                    "key": "seatTypeId",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soft Delete Seat",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/seat/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Seat",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/seat/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "13_Movie",
+            "item": [
+                {
+                    "name": "Get All Movies",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/movie?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get Movie by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/movie/1"
+                    }
+                },
+                {
+                    "name": "Create Movie",
+                    "request": {
+                        "method": "POST",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "movieName",
+                                    "value": "Avengers: Endgame",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "duration",
+                                    "value": "180",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "releaseDate",
+                                    "value": "2025-12-01",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "C:/Users/LENOVO/Downloads/sample.png"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/movie"
+                    }
+                },
+                {
+                    "name": "Update Movie",
+                    "request": {
+                        "method": "PUT",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "movieName",
+                                    "value": "Avengers: Secret Wars",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "duration",
+                                    "value": "200",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "releaseDate",
+                                    "value": "2026-05-05",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "C:/Users/LENOVO/Downloads/sample.png"
+                                }
+                            ]
+                        },
+                        "url": "{{baseUrl}}/api/movie/1"
+                    }
+                },
+                {
+                    "name": "Soft Delete Movie",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/movie/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Movie",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/movie/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "14_MovieFormat",
+            "item": [
+                {
+                    "name": "Get All Movie Formats",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/movie-format?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get Movie Format by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/movie-format/1"
+                    }
+                },
+                {
+                    "name": "Create Movie Format",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/movie-format?formatName=3D",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "movie-format"
+                            ],
+                            "query": [
+                                {
+                                    "key": "formatName",
+                                    "value": "3D"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Movie Format",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/movie-format/1?formatName=IMAX",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "movie-format",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "formatName",
+                                    "value": "IMAX"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soft Delete Movie Format",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/movie-format/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Movie Format",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/movie-format/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "15_MovieGenre",
+            "item": [
+                {
+                    "name": "Get All Movie Genres",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/movie-genre?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get Movie Genre by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/movie-genre/1"
+                    }
+                },
+                {
+                    "name": "Create Movie Genre",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/movie-genre?genreName=Action",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "movie-genre"
+                            ],
+                            "query": [
+                                {
+                                    "key": "genreName",
+                                    "value": "Action"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Movie Genre",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/movie-genre/1?genreName=Adventure",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "movie-genre",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "genreName",
+                                    "value": "Adventure"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soft Delete Movie Genre",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/movie-genre/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Movie Genre",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/movie-genre/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "16_AgeLimit",
+            "item": [
+                {
+                    "name": "Get All Age Limits",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/age-limit?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get Age Limit by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/age-limit/1"
+                    }
+                },
+                {
+                    "name": "Create Age Limit",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/age-limit?limitName=P13",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "age-limit"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limitName",
+                                    "value": "P13"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Age Limit",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/age-limit/1?limitName=P18",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "age-limit",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limitName",
+                                    "value": "P18"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soft Delete Age Limit",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/age-limit/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Age Limit",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/age-limit/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "17_Showtime",
+            "item": [
+                {
+                    "name": "Get All Showtimes",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/showtime?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get Showtime by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/showtime/1"
+                    }
+                },
+                {
+                    "name": "Create Showtime",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/showtime?movieId=1&formatId=1&cinemaId=1&roomId=1&showDate=2025-11-15&showTimeStart=14:00&showTimeEnd=16:00",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "showtime"
+                            ],
+                            "query": [
+                                {
+                                    "key": "movieId",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "formatId",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "cinemaId",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "roomId",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "showDate",
+                                    "value": "2025-11-15"
+                                },
+                                {
+                                    "key": "showTimeStart",
+                                    "value": "14:00"
+                                },
+                                {
+                                    "key": "showTimeEnd",
+                                    "value": "16:00"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Showtime",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/showtime/1?showDate=2025-11-20&showTimeStart=18:00&showTimeEnd=20:00",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "showtime",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "showDate",
+                                    "value": "2025-11-20"
+                                },
+                                {
+                                    "key": "showTimeStart",
+                                    "value": "18:00"
+                                },
+                                {
+                                    "key": "showTimeEnd",
+                                    "value": "20:00"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Soft Delete Showtime",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/showtime/1"
+                    }
+                },
+                {
+                    "name": "Restore Deleted Showtime",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{baseUrl}}/api/showtime/1/restore"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "18_Booking",
+            "item": [
+                {
+                    "name": "Get All Bookings",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/booking?page=1&pageSize=10"
+                    }
+                },
+                {
+                    "name": "Get Booking by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/booking/1"
+                    }
+                },
+                {
+                    "name": "Create Booking",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/booking?showtimeId=1&seatIds=1,2,3&userId=1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "booking"
+                            ],
+                            "query": [
+                                {
+                                    "key": "showtimeId",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "seatIds",
+                                    "value": "1,2,3"
+                                },
+                                {
+                                    "key": "userId",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Cancel Booking",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/booking/1"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "19_Payment",
+            "item": [
+                {
+                    "name": "Initiate Payment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"bookingId\": 1,\n  \"amount\": 180000,\n  \"returnUrl\": \"http://localhost:5173/payment-success\"\n}"
+                        },
+                        "url": "{{baseUrl}}/api/payment/initiate"
+                    }
+                },
+                {
+                    "name": "Payment Callback",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"transactionId\": \"1234567890\",\n  \"resultCode\": 0,\n  \"message\": \"Success\"\n}"
+                        },
+                        "url": "{{baseUrl}}/api/payment/callback"
+                    }
+                },
+                {
+                    "name": "Get Payment Status",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/payment/1/status"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "20_UserRating",
+            "item": [
+                {
+                    "name": "Get Ratings by Movie ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/user-rating/movie/1"
+                    }
+                },
+                {
+                    "name": "Get Ratings by User ID",
+                    "request": {
+                        "method": "GET",
+                        "url": "{{baseUrl}}/api/user-rating/user/1"
+                    }
+                },
+                {
+                    "name": "Create User Rating",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/user-rating?movieId=1&rating=9&comment=Phim%20rất%20hay!",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user-rating"
+                            ],
+                            "query": [
+                                {
+                                    "key": "movieId",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "rating",
+                                    "value": "9"
+                                },
+                                {
+                                    "key": "comment",
+                                    "value": "Phim rất hay!"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update User Rating",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/user-rating/1?rating=10&comment=Sau%20khi%20xem%20lại%20thì%20phim%20rất%20cảm%20động.",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user-rating",
+                                "1"
+                            ],
+                            "query": [
+                                {
+                                    "key": "rating",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "comment",
+                                    "value": "Sau khi xem lại thì phim rất cảm động."
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete User Rating",
+                    "request": {
+                        "method": "DELETE",
+                        "url": "{{baseUrl}}/api/user-rating/1"
+                    }
+                }
+            ]
+        }
+    ]
+}

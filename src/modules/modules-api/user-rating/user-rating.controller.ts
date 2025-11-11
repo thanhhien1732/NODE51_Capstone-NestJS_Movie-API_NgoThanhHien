@@ -15,7 +15,7 @@ export class UserRatingController {
 
   // ---------------- CREATE ----------------
   @Post()
-  @ApiOperation({ summary: 'User rates a movie (1–10)' })
+  @ApiOperation({ summary: 'User rates a movie (1-10)' })
   @MessageResponse('Rating created successfully!')
   create(@User() user: Users, @Query() dto: CreateUserRatingDto) {
     return this.service.create(user.userId, dto);

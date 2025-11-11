@@ -49,7 +49,8 @@ src/
 ┃ ┃ ┣ age-limit/
 ┃ ┃ ┣ showtime/
 ┃ ┃ ┣ booking/
-┃ ┃ ┗ payment/
+┃ ┃ ┣ payment/
+┃ ┃ ┗ user-rating/
 ┃ ┗ modules-system/
 ┃ ┣ prisma/
 ┃ ┗ token/
