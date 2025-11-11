@@ -3,7 +3,6 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nes
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
-import { SkipPermission } from 'src/common/decorators/skip-permission.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { User } from 'src/common/decorators/user.decorator';
 import type { Users } from 'generated/prisma';
@@ -89,7 +88,6 @@ export class UsersController {
   // ------------------ Find All User ------------------
   @Get()
   @Public()
-  @SkipPermission()
   @ApiOperation({
     summary: 'Find all users (support pagination & keyword search, all optional)',
   })

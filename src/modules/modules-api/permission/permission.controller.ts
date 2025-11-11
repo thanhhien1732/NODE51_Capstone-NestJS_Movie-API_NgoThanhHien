@@ -4,7 +4,6 @@ import { PermissionService } from './permission.service';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
-import { SkipPermission } from 'src/common/decorators/skip-permission.decorator';
 import { FindAllPermissionDto } from './dto/find-all-permission.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 
@@ -25,7 +24,6 @@ export class PermissionController {
   // ------------------ GET ALL PERMISSION ------------------
   @Get()
   @Public()
-  @SkipPermission()
   @ApiOperation({
     summary: 'Find all permissions (support pagination & keyword search, all optional)',
   })

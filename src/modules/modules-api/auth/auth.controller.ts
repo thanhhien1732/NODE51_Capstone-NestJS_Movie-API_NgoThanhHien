@@ -5,7 +5,6 @@ import { RegisterDto } from './dto/register-auth.dto';
 import { LoginDto } from './dto/login-auth.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
-import { SkipPermission } from 'src/common/decorators/skip-permission.decorator';
 import { User } from 'src/common/decorators/user.decorator';
 import type { Users } from 'generated/prisma';
 import { RefreshTokenDto } from './dto/refresh-token.dto';

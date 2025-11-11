@@ -140,7 +140,7 @@ http://localhost:3069/api/docs
 
 ---
 
-## 🧱 API Modules (Total: 110 APIs)
+## 🧱 API Modules (Total: 115 APIs)
 
 ### 🔐 Auth (4 APIs)
 | Method | Endpoint | Description |
@@ -327,6 +327,15 @@ http://localhost:3069/api/docs
 | POST | `/api/payment/initiate` | Initiate payment (mock gateway) |
 | POST | `/api/payment/callback` | Payment callback (webhook) |
 | GET | `/api/payment/{bookingId}/status` | Get payment status by booking ID |
+
+### ⭐ User Rating (5 APIs)
+| Method | Endpoint                               | Description                        |
+|--------|----------------------------------------|------------------------------------|
+| POST   | `/api/user-rating`                     | User rates a movie (1–10)          |
+| GET    | `/api/user-rating/movie/{movieId}`     | Get all ratings of a movie         |
+| GET    | `/api/user-rating/user/{userId}`       | Get all movies a user has rated    |
+| PUT    | `/api/user-rating/{id}`                | Update a user rating               |
+| DELETE | `/api/user-rating/{id}`                | Soft delete a rating               |
 
 ---
 

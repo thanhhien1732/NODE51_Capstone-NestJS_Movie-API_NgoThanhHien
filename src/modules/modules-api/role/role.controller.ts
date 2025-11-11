@@ -3,8 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { MessageResponse } from 'src/common/decorators/message-response.decorator';
-import { SkipPermission } from 'src/common/decorators/skip-permission.decorator';
+import { MessageResponse } from 'src/common/decorators/message-response.decorator'
 import { FindAllRoleDto } from './dto/find-all-role.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 
@@ -25,7 +24,6 @@ export class RoleController {
   // ------------------ FIND ALL ------------------
   @Get()
   @Public()
-  @SkipPermission()
   @ApiOperation({
     summary: 'Find all roles (support pagination & keyword search, all optional)',
   })

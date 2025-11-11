@@ -29,27 +29,28 @@ model Cinemas {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Movies {
-  movieId      Int          @id @default(autoincrement())
-  movieName    String       @db.VarChar(255)
-  description  String?      @db.Text
-  poster       String?      @db.VarChar(255)
-  trailer      String?      @db.VarChar(255)
-  startDate    DateTime?    @db.Date
-  endDate      DateTime?    @db.Date
+  movieId      Int           @id @default(autoincrement())
+  movieName    String        @db.VarChar(255)
+  description  String?       @db.Text
+  poster       String?       @db.VarChar(255)
+  trailer      String?       @db.VarChar(255)
+  startDate    DateTime?     @db.Date
+  endDate      DateTime?     @db.Date
   basePrice    Int?
-  rating       Int?
-  isComing     Boolean?     @default(false)
-  isShowing    Boolean?     @default(false)
-  isHot        Boolean?     @default(false)
+  rating       Float         @default(0) @db.Float
+  isComing     Boolean?      @default(false)
+  isShowing    Boolean?      @default(false)
+  isHot        Boolean?      @default(false)
   movieGenreId Int?
   ageLimitId   Int?
-  createdAt    DateTime     @default(now()) @db.Timestamp(0)
-  updatedAt    DateTime     @default(now()) @updatedAt @db.Timestamp(0)
-  isDeleted    Boolean?     @default(false)
-  deletedAt    DateTime?    @db.Timestamp(0)
-  AgeLimits    AgeLimits?   @relation(fields: [ageLimitId], references: [ageLimitId])
-  MovieGenres  MovieGenres? @relation(fields: [movieGenreId], references: [movieGenreId])
+  createdAt    DateTime      @default(now()) @db.Timestamp(0)
+  updatedAt    DateTime      @default(now()) @updatedAt @db.Timestamp(0)
+  isDeleted    Boolean?      @default(false)
+  deletedAt    DateTime?     @db.Timestamp(0)
+  AgeLimits    AgeLimits?    @relation(fields: [ageLimitId], references: [ageLimitId])
+  MovieGenres  MovieGenres?  @relation(fields: [movieGenreId], references: [movieGenreId])
   Showtimes    Showtimes[]
+  UserRatings  UserRatings[]
 
   @@index([movieGenreId], map: "fk_movies_genre")
   @@index([ageLimitId], map: "fk_movies_agelimit")
@@ -100,20 +101,21 @@ model Showtimes {
 }
 
 model Users {
-  userId      Int        @id @default(autoincrement())
-  fullName    String     @db.VarChar(100)
-  email       String     @unique(map: "email") @db.VarChar(100)
-  phoneNumber String?    @db.VarChar(20)
-  password    String     @db.VarChar(255)
-  avatar      String?    @db.VarChar(255)
-  googleId    String?    @unique(map: "googleId") @db.VarChar(255)
-  roleId      Int?       @default(2)
-  createdAt   DateTime   @default(now()) @db.Timestamp(0)
-  updatedAt   DateTime   @default(now()) @updatedAt @db.Timestamp(0)
-  isDeleted   Boolean?   @default(false)
-  deletedAt   DateTime?  @db.Timestamp(0)
+  userId      Int           @id @default(autoincrement())
+  fullName    String        @db.VarChar(100)
+  email       String        @unique(map: "email") @db.VarChar(100)
+  phoneNumber String?       @db.VarChar(20)
+  password    String        @db.VarChar(255)
+  avatar      String?       @db.VarChar(255)
+  googleId    String?       @unique(map: "googleId") @db.VarChar(255)
+  roleId      Int?          @default(2)
+  createdAt   DateTime      @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime      @default(now()) @updatedAt @db.Timestamp(0)
+  isDeleted   Boolean?      @default(false)
+  deletedAt   DateTime?     @db.Timestamp(0)
   Bookings    Bookings[]
-  Roles       Roles?     @relation(fields: [roleId], references: [roleId], map: "Users_ibfk_1")
+  UserRatings UserRatings[]
+  Roles       Roles?        @relation(fields: [roleId], references: [roleId], map: "Users_ibfk_1")
 
   @@index([email], map: "idxUserEmail")
   @@index([roleId], map: "roleId")
@@ -291,6 +293,21 @@ model Bookings {
   @@index([seatId], map: "Tickets_seatId_idx")
   @@index([showtimeId], map: "Tickets_showtimeId_idx")
   @@index([userId], map: "Tickets_userId_fkey")
+}
+
+model UserRatings {
+  ratingId  Int      @id @default(autoincrement())
+  userId    Int
+  movieId   Int
+  rating    Int
+  comment   String?  @db.Text
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
+  Movies    Movies   @relation(fields: [movieId], references: [movieId], onDelete: Cascade)
+  Users     Users    @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([movieId], map: "fk_userRatings_movieId")
+  @@index([userId], map: "fk_userRatings_userId")
 }
 
 enum Bookings_paymentStatus {
