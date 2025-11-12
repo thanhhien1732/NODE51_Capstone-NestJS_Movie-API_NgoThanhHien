@@ -14,6 +14,7 @@ This is a **Cinema Movie Booking System API** built with **NestJS**, **Prisma OR
 | Authentication | **JWT (Access & Refresh Token)** |
 | Image Storage | **Cloudinary** |
 | Validation | **class-validator + class-transformer** |
+| Hashing | **bcrypt** |
 | API Docs | **Swagger (OpenAPI 3)** |
 
 ---
@@ -74,6 +75,7 @@ src/
 | **Showtime** | Schedule movie showtimes and auto-calculate basePrice |
 | **Booking** | Reserve and manage ticket bookings |
 | **Payment** | Simulate payment process with callback confirmation |
+| **UserRating** | Allows users to rate and review movies they have booked and paid |
 
 ---
 
